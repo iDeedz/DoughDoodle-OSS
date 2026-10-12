@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36310.24 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoughDoodle", "DoughDoodle.csproj", "{8E6C5984-4000-43DE-AB7C-2CF85F4C1E99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoughDoodle.Tests", "Tests\DoughDoodle.Tests.csproj", "{603EB55F-4FB8-4F11-8504-F8E19F850809}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E6C5984-4000-43DE-AB7C-2CF85F4C1E99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E6C5984-4000-43DE-AB7C-2CF85F4C1E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E6C5984-4000-43DE-AB7C-2CF85F4C1E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E6C5984-4000-43DE-AB7C-2CF85F4C1E99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{603EB55F-4FB8-4F11-8504-F8E19F850809}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{603EB55F-4FB8-4F11-8504-F8E19F850809}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{603EB55F-4FB8-4F11-8504-F8E19F850809}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{603EB55F-4FB8-4F11-8504-F8E19F850809}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AEBC7EF9-E66C-4640-89A2-5492C836DFDC}
+	EndGlobalSection
+EndGlobal

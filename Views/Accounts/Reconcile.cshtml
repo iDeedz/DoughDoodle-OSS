@@ -1,0 +1,159 @@
+@model DoughDoodle.Controllers.ReconcileAccountViewModel
+@using DoughDoodle.Models
+@{
+    ViewData["Title"] = "Reconcile Account";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-10 offset-lg-1">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-check2-square"></i> Reconcile Account</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-1">Account</h6>
+                            <p class="mb-0"><strong>@Model.Account.Name</strong></p>
+                            <span class="badge bg-info text-dark">@Model.Account.AccountType</span>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-1">Current Balance</h6>
+                            <p class="mb-0 fs-5"><strong>@CurrencyDisplay.Format(Model.Account.Balance, ViewData["PreferredCurrency"] as string)</strong></p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted mb-1">Unreconciled Transactions</h6>
+                            <p class="mb-0 fs-5"><strong>@Model.UnreconciledTransactions.Count</strong> <small class="text-muted">(last 30 days)</small></p>
+                        </div>
+                    </div>
+
+                    <form asp-action="Reconcile" asp-route-id="@Model.Account.Id" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="statementBalance" class="form-label">Statement Balance *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                                    <input type="number" step="0.01" name="statementBalance" id="statementBalance"
+                                           class="form-control" value="@Model.StatementBalance.ToString("F2")" required />
+                                </div>
+                                <div class="form-text">Enter the ending balance from your bank or credit card statement.</div>
+                            </div>
+                        </div>
+
+                        @if (Model.UnreconciledTransactions.Any())
+                        {
+                            <h5 class="mb-3"><i class="bi bi-list-check"></i> Unreconciled Transactions</h5>
+                            <p class="text-muted">Check the transactions that appear on your statement.</p>
+
+                            <div class="table-responsive mb-4">
+                                <table class="table table-striped table-hover align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;">
+                                                <input type="checkbox" class="form-check-input" id="selectAll" title="Select all" />
+                                            </th>
+                                            <th>Date</th>
+                                            <th>Description</th>
+                                            <th>Type</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var transaction in Model.UnreconciledTransactions)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" class="form-check-input transaction-checkbox"
+                                                           name="reconciledTransactionIds" value="@transaction.Id" />
+                                                </td>
+                                                <td>@transaction.Date.ToString("MMM dd, yyyy")</td>
+                                                <td>@transaction.Description</td>
+                                                <td>
+                                                    <span class="badge bg-secondary">@transaction.TransactionType</span>
+                                                </td>
+                                                <td class="text-end @(transaction.Amount < 0 ? "text-danger" : "text-success")">
+                                                    <strong>@CurrencyDisplay.Format(transaction.Amount, ViewData["PreferredCurrency"] as string)</strong>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-light">
+                                            <td colspan="4" class="text-end"><strong>Selected Total:</strong></td>
+                                            <td class="text-end"><strong id="selectedTotal">@CurrencyDisplay.Format(0m, ViewData["PreferredCurrency"] as string)</strong></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> No unreconciled transactions found in the last 30 days.
+                                You can still reconcile by entering your statement balance below.
+                            </div>
+                        }
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Accounts
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2-square"></i> Complete Reconciliation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.transaction-checkbox');
+    const selectedTotalEl = document.getElementById('selectedTotal');
+
+    const amounts = {
+        @foreach (var transaction in Model.UnreconciledTransactions)
+        {
+            @:@transaction.Id: @transaction.Amount,
+        }
+    };
+
+    function updateSelectedTotal() {
+        if (!selectedTotalEl) return;
+        let total = 0;
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                total += amounts[parseInt(cb.value)] || 0;
+            }
+        });
+        selectedTotalEl.textContent = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total);
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            updateSelectedTotal();
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            if (selectAll) {
+                selectAll.checked = Array.from(checkboxes).every(c => c.checked);
+            }
+            updateSelectedTotal();
+        });
+    });
+
+    updateSelectedTotal();
+});
+</script>
+}

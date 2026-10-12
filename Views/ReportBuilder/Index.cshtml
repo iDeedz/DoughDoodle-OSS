@@ -1,0 +1,23 @@
+@model IEnumerable<DoughDoodle.Models.SavedReport>
+@{ ViewData["Title"] = "Custom report builder"; }
+<h2><i class="bi bi-sliders"></i> Custom report builder</h2>
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+<form method="post" asp-action="Run" class="card card-body mb-4">
+  @Html.AntiForgeryToken()
+  <div class="row g-2">
+    <div class="col-md-3"><label class="form-label">Name</label><input name="name" class="form-control" value="Custom report" /></div>
+    <div class="col-md-2"><label class="form-label">Start</label><input type="date" name="startDate" class="form-control" value="@DateTime.UtcNow.AddMonths(-1).ToString("yyyy-MM-dd")" /></div>
+    <div class="col-md-2"><label class="form-label">End</label><input type="date" name="endDate" class="form-control" value="@DateTime.UtcNow.ToString("yyyy-MM-dd")" /></div>
+    <div class="col-md-2"><label class="form-label">Save as</label><input name="saveAs" class="form-control" placeholder="optional" /></div>
+  </div>
+  <div class="form-check form-check-inline mt-2"><input class="form-check-input" type="checkbox" name="includeIncome" value="true" checked /><label class="form-check-label">Income</label></div>
+  <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="includeExpense" value="true" checked /><label class="form-check-label">Expense</label></div>
+  <div class="form-check form-check-inline"><input class="form-check-input" type="checkbox" name="includeByCategory" value="true" checked /><label class="form-check-label">By category</label></div>
+  <div class="mt-2"><button class="btn btn-primary">Run report</button></div>
+</form>
+<h5>Saved reports</h5>
+<ul class="list-group">
+@foreach (var r in Model) {
+  <li class="list-group-item d-flex justify-content-between"><span>@r.Name <small class="text-muted">@r.ReportType</small></span><span>@r.LastGeneratedAt.ToString("u")</span></li>
+}
+</ul>

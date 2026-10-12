@@ -1,0 +1,174 @@
+@{
+    ViewData["Title"] = "Welcome to DoughDoodle";
+    ViewData["FullBleed"] = true;
+}
+
+<section class="hero-section dd-landing-hero text-white py-5 mb-0">
+    <div class="container py-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6 dd-fade-up">
+                <img src="~/images/branding/logo-wordmark.svg" asp-append-version="true" alt="DoughDoodle" class="mb-3 d-none d-md-block" style="max-height:52px; filter: brightness(0) invert(1); opacity: .95;" />
+                <p class="text-uppercase small fw-bold opacity-75 mb-2" style="letter-spacing:.12em;">Envelope budgeting for real life</p>
+                <h1 class="display-4 fw-bold mb-3" style="letter-spacing:-.03em;">Know your dough left today</h1>
+                <p class="lead mb-3 opacity-90">PocketGuard-class clarity for your cash — free forever starter included.</p>
+                <p class="fs-5 opacity-85 mb-4">Assign every dollar. Hunt subscriptions. Import CSV honestly. Upgrade when you need more depth — no fake bank sync.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg text-dark fw-semibold">
+                        <i class="bi bi-wallet2"></i> Start free
+                    </a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign in
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center dd-fade-up">
+                <img src="~/images/branding/hero-dough.svg" asp-append-version="true" alt="Know your dough left today" class="img-fluid dd-landing-art" style="max-height: 360px;" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row g-4 mb-5 dd-stagger">
+        <div class="col-md-4">
+            <div class="dd-feature-card dd-feature-tile">
+                <div class="dd-feature-icon"><i class="bi bi-wallet2"></i></div>
+                <h2 class="h4">Envelope budgeting</h2>
+                <p class="text-muted mb-0">Digital envelopes for every category — traditional method, modern clarity.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-feature-card dd-feature-tile">
+                <div class="dd-feature-icon"><i class="bi bi-robot"></i></div>
+                <h2 class="h4">Coaching insights</h2>
+                <p class="text-muted mb-0">Budget tips, debt strategies, and savings ideas — optional AI providers with honest rule-based fallback.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-feature-card dd-feature-tile">
+                <div class="dd-feature-icon"><i class="bi bi-people"></i></div>
+                <h2 class="h4">Household sharing</h2>
+                <p class="text-muted mb-0">Share envelopes with a partner on Bankroll+. Seats scale by plan.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <div class="dd-accent-bar mx-auto"></div>
+            <h2 class="fw-bold">How it works</h2>
+        </div>
+        <div class="col-md-3 text-center mb-4">
+            <div class="step-number bg-primary text-white"><span>1</span></div>
+            <h3 class="h5">Create envelopes</h3>
+            <p class="text-muted">Groceries, rent, fun money, savings — your categories.</p>
+        </div>
+        <div class="col-md-3 text-center mb-4">
+            <div class="step-number bg-success text-white"><span>2</span></div>
+            <h3 class="h5">Allocate dough</h3>
+            <p class="text-muted">Give every dollar a job based on income and priorities.</p>
+        </div>
+        <div class="col-md-3 text-center mb-4">
+            <div class="step-number bg-info text-white"><span>3</span></div>
+            <h3 class="h5">Track spending</h3>
+            <p class="text-muted">Log expenses and watch balances update in real time.</p>
+        </div>
+        <div class="col-md-3 text-center mb-4">
+            <div class="step-number bg-warning text-white"><span>4</span></div>
+            <h3 class="h5">Get coaching tips</h3>
+            <p class="text-muted">Personalized suggestions to stay on pace — coaching tips, not financial advice.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-lg mb-5 overflow-hidden" style="border-radius: 1.25rem;">
+        <div class="row g-0">
+            <div class="col-md-5" style="background: linear-gradient(145deg,#0D9488,#0B1220);">
+                <div class="p-4 p-md-5 text-white h-100 d-flex flex-column justify-content-center">
+                    <h2 class="h3 fw-bold">Try the demo</h2>
+                    <p class="opacity-85 mb-0">Explore DoughDoodle without creating an account.</p>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="card-body p-4 p-md-5">
+                    <div class="dd-demo-pill mb-3">
+                        <strong><i class="bi bi-key me-1"></i> Demo credentials</strong><br />
+                        Email: <code>demo&#64;doughdoodle.com</code><br />
+                        Password: <code>Demo123!</code>
+                    </div>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                        <i class="bi bi-play-circle"></i> Open demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5 g-4">
+        <div class="col-12 text-center mb-2">
+            <h2 class="fw-bold">Choose your account type</h2>
+        </div>
+        <div class="col-md-6">
+            <div class="card account-type-card main-account h-100">
+                <div class="card-header text-center">
+                    <h3 class="h4 mb-1"><i class="bi bi-building"></i> Main account</h3>
+                    <p class="mb-0 opacity-75">Perfect for individuals and families</p>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Full envelope budgeting</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Up to 5 free sub-accounts</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> View sub-account budgets</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Coaching tips (optional AI)</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Debt &amp; savings planning</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary w-100">Create main account</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card account-type-card sub-account h-100">
+                <div class="card-header text-center">
+                    <h3 class="h4 mb-1"><i class="bi bi-person"></i> Sub account</h3>
+                    <p class="mb-0 opacity-75">Managed under a main account</p>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Personal envelopes</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Track your own expenses</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Private budget management</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-1"></i> Budget coaching tips</li>
+                        <li class="mb-2"><i class="bi bi-eye text-info me-1"></i> Main account can view (read-only)</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <p class="small text-muted mb-2">Requires invitation from main account holder</p>
+                    <button class="btn btn-outline-secondary w-100" disabled>Contact main account holder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold">Why people choose DoughDoodle</h2>
+            <p class="lead text-muted">Honest tools. Clear dough left. Zero Mint drama.</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="dd-feature-icon mx-auto mb-3"><i class="bi bi-shield-check"></i></div>
+            <h3 class="h5">Security first</h3>
+            <p class="text-muted">Your financial data stays protected with solid app security practices.</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="dd-feature-icon mx-auto mb-3"><i class="bi bi-graph-up-arrow"></i></div>
+            <h3 class="h5">Clarity that sticks</h3>
+            <p class="text-muted">Dough-left-today and envelope truth beat vague dashboards every time.</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="dd-feature-icon mx-auto mb-3"><i class="bi bi-people"></i></div>
+            <h3 class="h5">Family friendly</h3>
+            <p class="text-muted">Household sharing seats for partners — productized, not bolted on.</p>
+        </div>
+    </div>
+</div>

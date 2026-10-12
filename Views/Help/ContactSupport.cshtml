@@ -1,0 +1,348 @@
+@{
+    ViewData["Title"] = "Contact Support";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1><i class="bi bi-headset text-primary"></i> Contact Support</h1>
+                    <p class="lead text-muted">We're here to help you succeed with your budgeting journey</p>
+                </div>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Help Center
+                </a>
+            </div>
+
+            <!-- Quick Help Options -->
+            <div class="row mb-5">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-book text-primary mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Self-Help Resources</h5>
+                            <p class="card-text">Find instant answers in our comprehensive documentation.</p>
+                            <a href="@Url.Action("Index")" class="btn btn-outline-primary">Browse Help Center</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-camera-video text-info mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">Video Tutorials</h5>
+                            <p class="card-text">Watch step-by-step guides for visual learning.</p>
+                            <a href="@Url.Action("VideoTutorials")" class="btn btn-outline-info">Watch Videos</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-question-circle text-warning mb-3" style="font-size: 2.5rem;"></i>
+                            <h5 class="card-title">FAQ</h5>
+                            <p class="card-text">Quick answers to the most common questions.</p>
+                            <a href="@Url.Action("FAQ")" class="btn btn-outline-warning">View FAQ</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="bi bi-envelope"></i> Send Us a Message</h3>
+                </div>
+                <div class="card-body">
+                    <form id="supportForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="supportName" class="form-label">Your Name</label>
+                                    <input type="text" class="form-control" id="supportName" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="supportEmail" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="supportEmail" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="supportCategory" class="form-label">What can we help you with?</label>
+                            <select class="form-select" id="supportCategory" required>
+                                <option value="">Select a category...</option>
+                                <option value="getting-started">Getting Started / Setup</option>
+                                <option value="technical-issue">Technical Issue / Bug Report</option>
+                                <option value="feature-request">Feature Request / Suggestion</option>
+                                <option value="account-billing">Account / Billing Question</option>
+                                <option value="data-import">Import/Export Help</option>
+                                <option value="mobile-app">Mobile App Support</option>
+                                <option value="ai-features">AI Features / Recommendations</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="supportPriority" class="form-label">Priority Level</label>
+                            <select class="form-select" id="supportPriority">
+                                <option value="low">Low - General question</option>
+                                <option value="medium" selected>Medium - Need help but not urgent</option>
+                                <option value="high">High - Blocking my work</option>
+                                <option value="critical">Critical - Cannot access my account</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="supportSubject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="supportSubject" placeholder="Brief description of your issue" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="supportMessage" class="form-label">Detailed Message</label>
+                            <textarea class="form-control" id="supportMessage" rows="5" placeholder="Please describe your issue in detail. Include any error messages or steps you've already tried." required></textarea>
+                            <div class="form-text">
+                                <strong>💡 Tip:</strong> The more details you provide, the faster we can help you!
+                            </div>
+                        </div>
+
+                        <!-- System Info Section -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeSystemInfo" checked>
+                                <label class="form-check-label" for="includeSystemInfo">
+                                    Include system information (helps us troubleshoot technical issues)
+                                </label>
+                            </div>
+                            <div id="systemInfoPreview" class="mt-2 p-2 bg-light rounded small">
+                                <strong>System Info:</strong>
+                                <div id="systemInfoDetails">Loading...</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send"></i> Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Response Time Info -->
+            <div class="alert alert-info mt-4">
+                <h5><i class="bi bi-clock"></i> Response Times</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><strong>Critical:</strong> Within 2 hours</li>
+                            <li><strong>High:</strong> Within 4 hours</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><strong>Medium:</strong> Within 24 hours</li>
+                            <li><strong>Low:</strong> Within 2-3 business days</li>
+                        </ul>
+                    </div>
+                </div>
+                <small class="text-muted">*Response times are during business hours (Monday-Friday, 9 AM - 6 PM EST)</small>
+            </div>
+
+            <!-- Alternative Contact Methods -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-telephone"></i> Other Ways to Reach Us</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-envelope-at"></i> Email Support</h6>
+                            <p>Send us an email directly at:</p>
+                            <p><strong>support@doughdoodle.com</strong></p>
+                            
+                            <h6><i class="bi bi-bug"></i> Bug Reports</h6>
+                            <p>Found a bug? Report it at:</p>
+                            <p><strong>bugs@doughdoodle.com</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-lightbulb"></i> Feature Requests</h6>
+                            <p>Have an idea for a new feature?</p>
+                            <p><strong>features@doughdoodle.com</strong></p>
+                            
+                            <h6><i class="bi bi-shield-check"></i> Security Issues</h6>
+                            <p>Report security concerns to:</p>
+                            <p><strong>security@doughdoodle.com</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Community Resources -->
+            <div class="card mt-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-people"></i> Community Resources</h5>
+                </div>
+                <div class="card-body">
+                    <p>Connect with other DoughDoodle users and share tips!</p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-primary" onclick="alert('Community forum coming soon!')">
+                                    <i class="bi bi-chat-square-text"></i> Community Forum
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-info" onclick="alert('Discord server coming soon!')">
+                                    <i class="bi bi-discord"></i> Discord Chat
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a href="#" class="btn btn-outline-success" onclick="alert('Social media coming soon!')">
+                                    <i class="bi bi-twitter"></i> Follow Us
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0;
+}
+
+#systemInfoPreview {
+    transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Collect system information for troubleshooting
+    function getSystemInfo() {
+        const info = {
+            browser: navigator.userAgent,
+            screen: `${screen.width}x${screen.height}`,
+            viewport: `${window.innerWidth}x${window.innerHeight}`,
+            language: navigator.language,
+            platform: navigator.platform,
+            cookiesEnabled: navigator.cookieEnabled,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        };
+        
+        return Object.entries(info)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join('<br>');
+    }
+    
+    // Update system info preview
+    document.getElementById('systemInfoDetails').innerHTML = getSystemInfo();
+    
+    // Toggle system info inclusion
+    document.getElementById('includeSystemInfo').addEventListener('change', function() {
+        const preview = document.getElementById('systemInfoPreview');
+        preview.style.display = this.checked ? 'block' : 'none';
+    });
+    
+    // Handle form submission
+    document.getElementById('supportForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = {
+            name: document.getElementById('supportName').value,
+            email: document.getElementById('supportEmail').value,
+            category: document.getElementById('supportCategory').value,
+            priority: document.getElementById('supportPriority').value,
+            subject: document.getElementById('supportSubject').value,
+            message: document.getElementById('supportMessage').value,
+            systemInfo: document.getElementById('includeSystemInfo').checked ? getSystemInfo() : null
+        };
+        
+        // In a real application, this would send to a server endpoint
+        // For now, we'll show a success message
+        showSuccessMessage(formData);
+    });
+    
+    function showSuccessMessage(formData) {
+        const successAlert = document.createElement('div');
+        successAlert.className = 'alert alert-success alert-dismissible fade show';
+        successAlert.innerHTML = `
+            <strong><i class="bi bi-check-circle"></i> Message Sent Successfully!</strong><br>
+            <p class="mb-2">Thank you for contacting us! Here's what happens next:</p>
+            <ul class="mb-2">
+                <li>You'll receive a confirmation email with ticket #SUP-${Date.now()}</li>
+                <li>Our team will review your ${formData.category.replace('-', ' ')} request</li>
+                <li>Expect a response within our ${getPriorityResponseTime(formData.priority)} timeframe</li>
+            </ul>
+            <small class="text-muted">In the meantime, check our <a href="/Help/FAQ">FAQ</a> or <a href="/Help">Help Center</a> for immediate answers.</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert before the form
+        const form = document.getElementById('supportForm');
+        form.parentElement.insertBefore(successAlert, form);
+        
+        // Reset form
+        form.reset();
+        
+        // Scroll to success message
+        successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    
+    function getPriorityResponseTime(priority) {
+        const times = {
+            critical: '2 hours',
+            high: '4 hours',
+            medium: '24 hours',
+            low: '2-3 business days'
+        };
+        return times[priority] || '24 hours';
+    }
+    
+    // Auto-suggest subject based on category
+    document.getElementById('supportCategory').addEventListener('change', function() {
+        const category = this.value;
+        const subjectField = document.getElementById('supportSubject');
+        
+        if (!subjectField.value) { // Only suggest if subject is empty
+            const suggestions = {
+                'getting-started': 'Help with initial setup',
+                'technical-issue': 'Technical problem with...',
+                'feature-request': 'Feature suggestion: ',
+                'account-billing': 'Question about my account',
+                'data-import': 'Help importing transactions',
+                'mobile-app': 'Mobile app issue',
+                'ai-features': 'AI recommendations question'
+            };
+            
+            if (suggestions[category]) {
+                subjectField.placeholder = suggestions[category];
+            }
+        }
+    });
+});
+</script>

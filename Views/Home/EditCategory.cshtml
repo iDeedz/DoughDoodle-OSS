@@ -1,0 +1,111 @@
+﻿@model DoughDoodle.Models.Category
+@{
+    ViewData["Title"] = "Edit Category";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-pencil-square me-2"></i>Edit Envelope Category
+                    </h4>
+                    <p class="card-text mb-0 opacity-75">Update your budget envelope name</p>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditCategory" method="post" class="needs-validation" novalidate>
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="mb-4">
+                            <label for="Name" class="form-label fw-semibold">
+                                <i class="bi bi-tag me-1"></i>Category Name
+                            </label>
+                            <input asp-for="Name" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="e.g., Groceries, Entertainment, Savings..."
+                                   required 
+                                   maxlength="50" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                            <div class="form-text">
+                                Choose a descriptive name for your budget envelope. This will help you track your spending.
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <div>
+                                <strong>Note:</strong> Changing the category name will update it across all your transactions and budgets.
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3 justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                            </a>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-danger btn-lg" onclick="confirmDelete(@Model.Id, '@Model.Name')">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                                <button type="submit" class="btn btn-info btn-lg text-white">
+                                    <i class="bi bi-check-circle me-1"></i>Update Category
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        // Set focus to input and select text
+        document.addEventListener('DOMContentLoaded', function() {
+            var nameInput = document.getElementById('Name');
+            nameInput.focus();
+            nameInput.select();
+        });
+        
+        // Bootstrap form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+        
+        function confirmDelete(categoryId, categoryName) {
+            if (confirm(`Are you sure you want to delete the "${categoryName}" category? This will also delete all associated transactions and cannot be undone.`)) {
+                // Create a form to submit delete request
+                var form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/Home/DeleteCategory/' + categoryId;
+                
+                // Add CSRF token if needed
+                var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    var tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '__RequestVerificationToken';
+                    tokenInput.value = token.value;
+                    form.appendChild(tokenInput);
+                }
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+}

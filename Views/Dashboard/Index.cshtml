@@ -1,0 +1,292 @@
+@using DoughDoodle.Models.ViewModels
+@using DoughDoodle.Helpers
+@model UserDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard - " + Model.UserName;
+    var cc = Model.PreferredCurrency ?? "USD";
+    var health = Model.FinancialHealth.HealthScore;
+    var healthColor = health >= 80 ? "#10b981" : health >= 60 ? "#f59e0b" : "#ef4444";
+    var monthLabel = DateTime.ParseExact(Model.CurrentMonth, "yyyy-MM", null).ToString("MMMM yyyy");
+    var isEmpty = Model.BudgetStats.TotalBudgeted == 0 && Model.BudgetStats.TotalSpent == 0;
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="~/js/enhanced-charts.js" asp-append-version="true"></script>
+
+<div class="container-fluid dd-dashboard">
+    <div class="dd-page-header dd-fade-up">
+        <div>
+            <div class="dd-accent-bar"></div>
+            <h1>Welcome back, @Model.UserName</h1>
+            <p class="dd-subtitle">Your money overview for @monthLabel</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-envelope-paper"></i> Envelopes
+            </a>
+            <a asp-action="FamilyDashboard" class="btn btn-primary btn-sm">
+                <i class="bi bi-people"></i> Household
+            </a>
+        </div>
+    </div>
+
+    @if (Model.SafeToSpend != null)
+    {
+        var s = Model.SafeToSpend;
+        <div class="card dd-dough-hero mb-4 dd-fade-up">
+            <div class="card-body p-4">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-4 text-center text-lg-start">
+                        <div class="dd-metric-label">Dough left today</div>
+                        <div class="display-amount mt-1">@CurrencyDisplay.Format(s.DoughLeftToday, cc)</div>
+                        <div class="dd-metric-meta mt-2">
+                            Safe to spend · @s.DaysRemaining days left in the month
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <div class="dd-dough-stat">
+                                    <div class="val">@CurrencyDisplay.Format(s.RemainingBudget, cc, compact: true)</div>
+                                    <div class="lbl">Envelope left</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="dd-dough-stat">
+                                    <div class="val">@CurrencyDisplay.Format(s.DailyBurnRate, cc, compact: true)</div>
+                                    <div class="lbl">Daily burn</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="dd-dough-stat">
+                                    <div class="val">@s.PaceStatus</div>
+                                    <div class="lbl">Pace</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        @if (s.Alerts.Any())
+                        {
+                            <div class="small">
+                                @foreach (var a in s.Alerts.Take(3))
+                                {
+                                    <div class="mb-2 d-flex gap-2 align-items-start small text-secondary">
+                                        <i class="bi bi-exclamation-triangle-fill mt-1 text-warning"></i>
+                                        <span>@a.Message</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="small text-secondary d-flex gap-2 align-items-start">
+                                <i class="bi bi-check-circle-fill mt-1 text-success"></i>
+                                <span>Pace looks healthy — keep assigning every bit of dough.</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="dd-health-card mb-4 dd-fade-up">
+        <div class="row align-items-center g-3">
+            <div class="col-auto">
+                <div class="dd-health-ring" style="--dd-health: @health; --dd-health-color: @healthColor;">
+                    @health.ToString("0")
+                </div>
+            </div>
+            <div class="col">
+                <h5 class="mb-1"><i class="bi bi-heart-pulse text-danger me-1"></i> Financial health</h5>
+                <p class="mb-2 text-muted small">Status: <strong class="text-body">@Model.FinancialHealth.HealthStatus</strong></p>
+                <div class="progress" style="height: 8px; max-width: 420px;">
+                    <div class="progress-bar @(health >= 80 ? "bg-success" : health >= 60 ? "bg-warning" : "bg-danger")"
+                         style="width: @health%"></div>
+                </div>
+            </div>
+            <div class="col-md-auto">
+                <div class="d-flex gap-4 text-center">
+                    <div>
+                        <div class="fw-bold fs-5 text-success">@CurrencyDisplay.Format(Model.FinancialHealth.EmergencyFundBalance, cc, compact: true)</div>
+                        <div class="small text-muted">Emergency fund</div>
+                    </div>
+                    <div>
+                        <div class="fw-bold fs-5" style="color: var(--dd-teal);">@Model.FinancialHealth.SavingsRate%</div>
+                        <div class="small text-muted">Savings rate</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (isEmpty)
+    {
+        <div class="dd-empty mb-4 dd-fade-up">
+            <img src="~/images/branding/empty-envelopes.svg" asp-append-version="true" alt="No envelopes yet" />
+            <h4>No envelopes yet — let’s fund this month</h4>
+            <p>Fund your envelopes and log a few transactions. Dough left today and health score light up once cash is moving.</p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <a asp-controller="Onboarding" asp-action="Index" class="btn btn-primary">
+                    <i class="bi bi-rocket-takeoff"></i> Get started
+                </a>
+                <a asp-controller="Home" asp-action="AddCategory" class="btn btn-outline-secondary">
+                    <i class="bi bi-plus-circle"></i> Create envelope
+                </a>
+                <a asp-controller="ImportExport" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-upload"></i> Import CSV
+                </a>
+            </div>
+        </div>
+    }
+
+    <div class="row g-3 mb-4 dd-stagger">
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Total budgeted</div>
+                        <div class="dd-metric-value">@CurrencyDisplay.Format(Model.BudgetStats.TotalBudgeted, cc, compact: true)</div>
+                        <div class="dd-metric-meta">@Model.BudgetStats.TotalCategories categories</div>
+                    </div>
+                    <div class="dd-metric-icon teal"><i class="bi bi-wallet2"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Total spent</div>
+                        <div class="dd-metric-value">@CurrencyDisplay.Format(Model.BudgetStats.TotalSpent, cc, compact: true)</div>
+                        <div class="dd-metric-meta">@Model.BudgetStats.SpentPercentage% of budget</div>
+                    </div>
+                    <div class="dd-metric-icon coral"><i class="bi bi-credit-card"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Remaining</div>
+                        <div class="dd-metric-value">@CurrencyDisplay.Format(Model.BudgetStats.TotalRemaining, cc, compact: true)</div>
+                        <div class="dd-metric-meta">Left to spend</div>
+                    </div>
+                    <div class="dd-metric-icon success"><i class="bi bi-piggy-bank"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Projected</div>
+                        <div class="dd-metric-value">@CurrencyDisplay.Format(Model.SpendingAnalytics.ProjectedMonthlySpending, cc, compact: true)</div>
+                        <div class="dd-metric-meta">Month-end estimate</div>
+                    </div>
+                    <div class="dd-metric-icon gold"><i class="bi bi-graph-up-arrow"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="card border-0 h-100">
+                <div class="card-header bg-transparent border-bottom-0 d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-graph-up me-1" style="color: var(--dd-teal);"></i> Monthly spending trend</span>
+                </div>
+                <div class="card-body pt-0">
+                    @if (Model.MonthlySpendingChart == null || !Model.MonthlySpendingChart.Any())
+                    {
+                        <div class="dd-empty py-4">
+                            <img src="~/images/branding/hero-dough.svg" asp-append-version="true" alt="" style="max-width:180px" />
+                            <h4 class="h6">No trend yet</h4>
+                            <p class="mb-0">Log a few months of spending to see the rise.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <canvas id="monthlySpendingChart" height="80"></canvas>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 h-100">
+                <div class="card-header bg-transparent border-bottom-0">
+                    <span><i class="bi bi-pie-chart me-1" style="color: var(--dd-teal);"></i> Category breakdown</span>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center pt-0">
+                    @if (Model.CategoryBreakdownChart == null || !Model.CategoryBreakdownChart.Any())
+                    {
+                        <div class="dd-empty w-100 py-4">
+                            <img src="~/images/branding/empty-envelopes.svg" asp-append-version="true" alt="" style="max-width:160px" />
+                            <h4 class="h6">No category spend yet</h4>
+                            <p class="mb-0">Add a transaction to slice the pie.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <canvas id="categoryChart" height="280"></canvas>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const monthlySpendingData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlySpendingChart));
+    const categoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryBreakdownChart));
+    const currencyPrefix = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(cc)));
+
+    if (document.getElementById('monthlySpendingChart') && monthlySpendingData && monthlySpendingData.length) {
+        const monthlySpendingCtx = document.getElementById('monthlySpendingChart').getContext('2d');
+        createEnhancedLineChart(monthlySpendingCtx, {
+            labels: monthlySpendingData.map(d => d.month || d.Month),
+            datasets: [{
+                label: 'Actual Spending',
+                data: monthlySpendingData.map(d => d.amount ?? d.Amount),
+                borderColor: '#0D9488',
+                backgroundColor: 'rgba(42, 157, 143, 0.12)',
+                fill: true,
+                tension: 0.4
+            }, {
+                label: 'Budget',
+                data: monthlySpendingData.map(d => d.budget ?? d.Budget),
+                borderColor: '#F43F5E',
+                backgroundColor: 'rgba(231, 111, 81, 0.08)',
+                fill: false,
+                borderDash: [5, 5],
+                tension: 0.4
+            }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (value) {
+                            return currencyPrefix + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (document.getElementById('categoryChart') && categoryData && categoryData.length) {
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        createEnhancedDoughnutChart(categoryCtx, {
+            labels: categoryData.map(d => d.category || d.Category),
+            datasets: [{
+                data: categoryData.map(d => d.amount ?? d.Amount),
+                backgroundColor: categoryData.map(d => d.color || d.Color),
+                borderWidth: 3,
+                borderColor: '#fff'
+            }]
+        });
+    }
+</script>

@@ -1,0 +1,58 @@
+<!-- Theme Switcher Component -->
+<!-- Part of "Additional UI Themes" enhancement -->
+
+<div class="theme-switcher-container mb-3">
+    <label for="theme-selector" class="form-label">
+        <i class="bi bi-palette"></i> Color Theme
+    </label>
+    <select id="theme-selector" class="form-select" data-theme-selector>
+        <option value="default">Default (Light)</option>
+        <option value="ocean">Ocean Blue</option>
+        <option value="forest">Forest Green</option>
+        <option value="sunset">Sunset</option>
+        <option value="purple">Purple Professional</option>
+        <option value="dark">Dark Mode</option>
+        <option value="high-contrast">High Contrast</option>
+    </select>
+    <div class="form-text">
+        Choose a color theme that suits your preference. Your selection is saved automatically.
+    </div>
+</div>
+
+<!-- Alternative: Theme Quick Selector Buttons -->
+<div class="theme-quick-selector d-none">
+    <label class="form-label">
+        <i class="bi bi-palette"></i> Quick Theme Switch
+    </label>
+    <div class="btn-group d-flex flex-wrap gap-2" role="group" aria-label="Theme selector">
+        <button type="button" class="btn btn-outline-primary btn-sm" data-theme-button="default" title="Default">
+            <i class="bi bi-sun"></i> Default
+        </button>
+        <button type="button" class="btn btn-outline-info btn-sm" data-theme-button="ocean" title="Ocean Blue">
+            <i class="bi bi-water"></i> Ocean
+        </button>
+        <button type="button" class="btn btn-outline-success btn-sm" data-theme-button="forest" title="Forest Green">
+            <i class="bi bi-tree"></i> Forest
+        </button>
+        <button type="button" class="btn btn-outline-warning btn-sm" data-theme-button="sunset" title="Sunset">
+            <i class="bi bi-sunset"></i> Sunset
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-theme-button="purple" title="Purple">
+            <i class="bi bi-gem"></i> Purple
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm" data-theme-button="dark" title="Dark Mode">
+            <i class="bi bi-moon-stars"></i> Dark
+        </button>
+        <button type="button" class="btn btn-outline-dark btn-sm" data-theme-button="high-contrast" title="High Contrast">
+            <i class="bi bi-eye"></i> High Contrast
+        </button>
+    </div>
+</div>
+
+<style>
+    .theme-quick-selector .btn.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+</style>

@@ -1,0 +1,141 @@
+@model DoughDoodle.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    ViewData["FullBleed"] = true;
+}
+
+<div class="dd-auth-shell">
+<div class="container">
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+        <div class="dd-auth-card">
+            <div class="dd-auth-top">
+                <img src="~/images/branding/logo-mark.svg" asp-append-version="true" alt="" />
+                <h1 class="h3 mb-1 text-white">Start tracking your dough</h1>
+                <p class="mb-0 opacity-75">Free forever starter — envelope budgeting with dough-left-today clarity</p>
+            </div>
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Enter your first name" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" placeholder="Enter your last name" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email address" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                        <div class="form-text">This will be your username for signing in.</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <input asp-for="Password" class="form-control" placeholder="Create a password" />
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label"></label>
+                                <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label asp-for="UserType" class="form-label">Account Type</label>
+                        <select asp-for="UserType" class="form-select" id="userTypeSelect" onchange="toggleParentAccount()">
+                            <option value="MainAccount">Main Account (Can create up to 5 sub-accounts)</option>
+                            <option value="SubAccount">Sub Account (Linked to a main account)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group mb-3" id="parentAccountDiv" style="display: none;">
+                        <label class="form-label">Parent Account Email</label>
+                        <input asp-for="ParentUserEmail" class="form-control" placeholder="Enter parent account email" />
+                        <div class="form-text">Enter the email of the main account that will manage this sub-account.</div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-person-check-fill"></i> Create Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">
+                    Already have an account? 
+                    <a asp-action="Login" class="text-decoration-none">Sign in here</a>
+                </p>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-building"></i> Main Account</h5>
+                        <ul class="list-unstyled">
+                            <li>✅ Full access to envelope budgeting</li>
+                            <li>✅ Create up to 5 free sub-accounts</li>
+                            <li>✅ View all sub-account budgets</li>
+                            <li>✅ AI-powered budget recommendations</li>
+                            <li>✅ Complete financial overview</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-person"></i> Sub Account</h5>
+                        <ul class="list-unstyled">
+                            <li>✅ Personal envelope budgeting</li>
+                            <li>✅ Track your own expenses</li>
+                            <li>✅ Private budget management</li>
+                            <li>✅ AI budget advice</li>
+                            <li>📊 Main account can view (read-only)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<script>
+function toggleParentAccount() {
+    const userType = document.getElementById('userTypeSelect').value;
+    const parentDiv = document.getElementById('parentAccountDiv');
+    
+    if (userType === 'SubAccount') {
+        parentDiv.style.display = 'block';
+    } else {
+        parentDiv.style.display = 'none';
+    }
+}
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

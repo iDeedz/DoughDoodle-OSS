@@ -1,0 +1,194 @@
+@model List<DoughDoodle.Models.ViewModels.CategoryAnalysisItem>
+@{
+    ViewData["Title"] = "Category Analysis";
+    var cc = CurrencyDisplay.Normalize(ViewData["PreferredCurrency"] as string);
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-pie-chart text-primary"></i> Category Analysis</h1>
+            <p class="lead text-muted">Detailed insights into your spending categories</p>
+        </div>
+        <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to Overview
+        </a>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Top Spending Categories -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-trophy"></i> Top Spending Categories</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Category</th>
+                                        <th class="text-end">Total Spent</th>
+                                        <th class="text-end">Avg Transaction</th>
+                                        <th class="text-center">Transaction Count</th>
+                                        <th class="text-end">Monthly Average</th>
+                                        <th class="text-center">Last Activity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{int rank = 1;}
+                                    @foreach (var category in Model.Take(10))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <span class="badge @(rank <= 3 ? "bg-warning" : "bg-secondary")">@rank</span>
+                                            </td>
+                                            <td><strong>@category.CategoryName</strong></td>
+                                            <td class="text-end">@CurrencyDisplay.Format(category.TotalSpent, ViewData["PreferredCurrency"] as string)</td>
+                                            <td class="text-end">@CurrencyDisplay.Format(category.AverageTransaction, ViewData["PreferredCurrency"] as string)</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">@category.TransactionCount</span>
+                                            </td>
+                                            <td class="text-end">@CurrencyDisplay.Format(category.MonthlyAverage, ViewData["PreferredCurrency"] as string)</td>
+                                            <td class="text-center">
+                                                @if (category.LastTransaction != DateTime.MinValue)
+                                                {
+                                                    <small class="text-muted">@category.LastTransaction.ToString("MMM dd, yyyy")</small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">No transactions</small>
+                                                }
+                                            </td>
+                                        </tr>
+                                        rank++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Most Expensive Category</h6>
+                        <h5 class="card-title text-primary">@Model.First().CategoryName</h5>
+                        <p class="mb-0">@CurrencyDisplay.Format(Model.First().TotalSpent, ViewData["PreferredCurrency"] as string)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-success">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Most Active Category</h6>
+                        <h5 class="card-title text-success">@Model.OrderByDescending(x => x.TransactionCount).First().CategoryName</h5>
+                        <p class="mb-0">@Model.OrderByDescending(x => x.TransactionCount).First().TransactionCount transactions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Highest Avg Transaction</h6>
+                        <h5 class="card-title text-info">@Model.OrderByDescending(x => x.AverageTransaction).First().CategoryName</h5>
+                        <p class="mb-0">@CurrencyDisplay.Format(Model.OrderByDescending(x => x.AverageTransaction).First().AverageTransaction, ViewData["PreferredCurrency"] as string)</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <h6 class="card-subtitle mb-2 text-muted">Total Categories</h6>
+                        <h4 class="card-title text-warning">@Model.Count</h4>
+                        <p class="mb-0">@Model.Count(x => x.TransactionCount > 0) active</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Category Breakdown -->
+        <div class="row">
+            @foreach (var category in Model.Where(x => x.TransactionCount > 0))
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">@category.CategoryName</h6>
+                            <span class="badge bg-primary">@category.TransactionCount txns</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <h5 class="text-primary">@CurrencyDisplay.Format(category.TotalSpent, ViewData["PreferredCurrency"] as string)</h5>
+                                    <small class="text-muted">Total Spent</small>
+                                </div>
+                                <div class="col-6">
+                                    <h5 class="text-success">@CurrencyDisplay.Format(category.MonthlyAverage, ViewData["PreferredCurrency"] as string)</h5>
+                                    <small class="text-muted">Monthly Avg</small>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-muted">Average Transaction:</small>
+                                    <br><strong>@CurrencyDisplay.Format(category.AverageTransaction, ViewData["PreferredCurrency"] as string)</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Largest Transaction:</small>
+                                    <br><strong>@CurrencyDisplay.Format(category.LargestTransaction, ViewData["PreferredCurrency"] as string)</strong>
+                                </div>
+                            </div>
+                            @if (category.LastTransaction != DateTime.MinValue)
+                            {
+                                <div class="mt-2">
+                                    <small class="text-muted">Last activity:</small>
+                                    <br><strong>@category.LastTransaction.ToString("MMM dd, yyyy")</strong>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-grid">
+                                <a href="/Search?category=@category.CategoryName" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-search"></i> View Transactions
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-pie-chart" style="font-size: 4rem; opacity: 0.3;"></i>
+            <h4 class="mt-3">No Category Data</h4>
+            <p>Start adding transactions to see detailed category analysis</p>
+            <a href="/Home/AddTransaction" class="btn btn-primary">Add Your First Transaction</a>
+        </div>
+    }
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+</style>

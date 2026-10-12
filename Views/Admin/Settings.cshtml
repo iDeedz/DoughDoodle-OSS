@@ -1,0 +1,295 @@
+@model DoughDoodle.Models.ViewModels.AdminSettingsViewModel
+@{
+    ViewData["Title"] = "Admin Settings";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="bi bi-gear-fill"></i> Admin Settings</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a asp-action="Dashboard">Admin</a></li>
+                        <li class="breadcrumb-item active">Settings</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- System Configuration -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-cpu"></i> System Configuration</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="UpdateSystemSettings">
+                        <div class="mb-3">
+                            <label class="form-label">Default Trial Period (Days)</label>
+                            <input type="number" class="form-control" name="DefaultTrialPeriodDays" value="30" min="1" max="365">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Max Sub-Accounts (Free Plan)</label>
+                            <input type="number" class="form-control" name="MaxSubAccountsForFree" value="5" min="1" max="50">
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enableTrialExtensions" name="EnableTrialExtensions" checked>
+                                <label class="form-check-label" for="enableTrialExtensions">
+                                    Enable trial extensions
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="autoDeactivateExpiredTrials" name="AutoDeactivateExpiredTrials">
+                                <label class="form-check-label" for="autoDeactivateExpiredTrials">
+                                    Auto-deactivate expired trials
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Update System Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management Settings -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-people"></i> User Management</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="UpdateUserSettings">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="allowSelfRegistration" name="AllowSelfRegistration" checked>
+                                <label class="form-check-label" for="allowSelfRegistration">
+                                    Allow self-registration
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="requireEmailVerification" name="RequireEmailVerification" checked>
+                                <label class="form-check-label" for="requireEmailVerification">
+                                    Require email verification
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Default User Role</label>
+                            <select class="form-select" name="DefaultUserRole">
+                                <option value="User" selected>User</option>
+                                <option value="Pocket">Pocket</option>
+                                <option value="Bankroll">Bankroll</option>
+                                <option value="Stack">Stack</option>
+                                <option value="Vault">Vault</option>
+                                <option value="Prime">Prime</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password Minimum Length</label>
+                            <input type="number" class="form-control" name="PasswordMinLength" value="6" min="4" max="20">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Update User Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Policies -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-shield-check"></i> Security Policies</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="UpdateSecuritySettings">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enableTwoFactorAuth" name="EnableTwoFactorAuth">
+                                <label class="form-check-label" for="enableTwoFactorAuth">
+                                    Enable two-factor authentication
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="logUserActivity" name="LogUserActivity" checked>
+                                <label class="form-check-label" for="logUserActivity">
+                                    Log user activity
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Session Timeout (Minutes)</label>
+                            <input type="number" class="form-control" name="SessionTimeoutMinutes" value="60" min="15" max="1440">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Max Login Attempts</label>
+                            <input type="number" class="form-control" name="MaxLoginAttempts" value="5" min="3" max="10">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check"></i> Update Security Settings
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-heart-pulse"></i> System Health</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="text-success fs-4">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <small class="text-muted">Database</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="text-success fs-4">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <small class="text-muted">Cache</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="text-warning fs-4">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                </div>
+                                <small class="text-muted">Storage</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="text-success fs-4">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </div>
+                                <small class="text-muted">Email</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="runSystemDiagnostics()">
+                            <i class="bi bi-gear"></i> Run Diagnostics
+                        </button>
+                        <button class="btn btn-outline-info" onclick="viewSystemLogs()">
+                            <i class="bi bi-file-text"></i> View System Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Database Management -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-database"></i> Database Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <h4 class="text-primary">@(Model?.TotalUsers ?? 0)</h4>
+                                    <small class="text-muted">Total Users</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h4 class="text-success">@(Model?.TotalTransactions ?? 0)</h4>
+                                    <small class="text-muted">Transactions</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <h4 class="text-info">@(Model?.TotalCategories ?? 0)</h4>
+                                    <small class="text-muted">Categories</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <h4 class="text-warning">@(Model?.DatabaseSizeMB ?? 0)MB</h4>
+                                    <small class="text-muted">Database Size</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-primary" onclick="optimizeDatabase()">
+                            <i class="bi bi-gear"></i> Optimize Database
+                        </button>
+                        <button class="btn btn-outline-success" onclick="backupDatabase()">
+                            <i class="bi bi-download"></i> Backup Database
+                        </button>
+                        <button class="btn btn-outline-info" onclick="runMigrations()">
+                            <i class="bi bi-arrow-up-circle"></i> Run Migrations
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="clearCache()">
+                            <i class="bi bi-trash"></i> Clear Cache
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function runSystemDiagnostics() {
+    console.log('Running system diagnostics...');
+    // Implementation would go here
+}
+
+function viewSystemLogs() {
+    console.log('Viewing system logs...');
+    // Implementation would go here
+}
+
+function optimizeDatabase() {
+    console.log('Optimizing database...');
+    // Implementation would go here
+}
+
+function backupDatabase() {
+    console.log('Backing up database...');
+    // Implementation would go here
+}
+
+function runMigrations() {
+    console.log('Running migrations...');
+    // Implementation would go here
+}
+
+function clearCache() {
+    console.log('Clearing cache...');
+    // Implementation would go here
+}
+</script>

@@ -1,0 +1,420 @@
+@using Microsoft.AspNetCore.Identity
+@using DoughDoodle.Models
+@inject UserManager<ApplicationUser> UserManager
+@inject DoughDoodle.Services.Billing.IDoughEntitlementService DoughEntitlements
+@{
+    var ddTierName = "Pocket";
+    var ddTierImg = "/images/tiers/tier-pocket.svg";
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        var ddUser = UserManager.GetUserAsync(User).GetAwaiter().GetResult();
+        var ddTier = DoughEntitlements.GetTier(ddUser);
+        ddTierName = DoughEntitlements.GetPackDisplayName(ddTier);
+        ddTierImg = DoughEntitlements.GetTierImagePath(ddTier);
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - DoughDoodle</title>
+    <link rel="manifest" href="~/manifest.webmanifest" />
+    <meta name="theme-color" content="#0D9488" />
+    <link rel="icon" href="~/images/branding/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="~/images/branding/logo-mark.svg" />
+    
+    <!-- Performance Optimizations: Preconnect to CDNs -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css?v=lib-restore-20260925" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/themes.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/DoughDoodle.styles.css" asp-append-version="true" />
+    <!-- Bootstrap Icons (local vendor — works offline / CSP / SW) -->
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css?v=icons-local-20260925" />
+</head>
+<body class="@(User.Identity?.IsAuthenticated == true ? "authenticated-page" : "public-page")">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light dd-navbar sticky-top">
+            <div class="container-fluid px-3 px-lg-4 dd-nav-inner">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/branding/logo-mark.svg" asp-append-version="true" alt="" width="28" height="28" />
+                    <span>DoughDoodle</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#ddNavbarCollapse" aria-controls="ddNavbarCollapse"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse" id="ddNavbarCollapse">
+                    <ul class="navbar-nav dd-nav-primary align-items-lg-center">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Goals" asp-action="Index">Goals</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reports</a>
+                            <ul class="dropdown-menu dd-dropdown">
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="Index">Overview</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="TrendAnalysis">Trends</a></li>
+                                <li><a class="dropdown-item" asp-controller="Reports" asp-action="CashFlow">Cash Flow</a></li>
+                                <li><a class="dropdown-item" asp-controller="Forecast" asp-action="Index">Forecast</a></li>
+                                <li><a class="dropdown-item" asp-controller="ReportBuilder" asp-action="Index">Custom builder</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">More</a>
+                            <ul class="dropdown-menu dd-dropdown dd-more-menu">
+                                <li><h6 class="dropdown-header">Money</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Accounts" asp-action="Index">Accounts</a></li>
+                                <li><a class="dropdown-item" asp-controller="Budget" asp-action="MonthlyWorkflow">Monthly Budget</a></li>
+                                <li><a class="dropdown-item" asp-controller="Bills" asp-action="Index">Bills</a></li>
+                                <li><a class="dropdown-item" asp-controller="NetWorth" asp-action="Index">Net Worth</a></li>
+                                <li><a class="dropdown-item" asp-controller="Investments" asp-action="Index">Investments</a></li>
+                                <li><a class="dropdown-item" asp-controller="Recurring" asp-action="Index">Recurring</a></li>
+                                <li><a class="dropdown-item" asp-controller="Recurring" asp-action="SubscriptionHunter">Subscription Hunter</a></li>
+                                <li><a class="dropdown-item" asp-controller="Transfers" asp-action="Index">Transfers</a></li>
+                                <li><a class="dropdown-item" asp-controller="ImportExport" asp-action="Index">Import/Export</a></li>
+                                <li><a class="dropdown-item" asp-controller="BankSync" asp-action="Index">Bank sync</a></li>
+                                <li><a class="dropdown-item" asp-controller="Currency" asp-action="Index">Currency</a></li>
+                                <li><a class="dropdown-item" asp-controller="Household" asp-action="Index">Household</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Plan</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Calendar" asp-action="Index">Calendar</a></li>
+                                <li><a class="dropdown-item" asp-controller="GoalAnalytics" asp-action="Index">Goal analytics</a></li>
+                                <li><a class="dropdown-item" asp-controller="NetWorthProjections" asp-action="Index">Net worth projections</a></li>
+                                <li><a class="dropdown-item" asp-controller="TeamBudgets" asp-action="Index">Team budgets</a></li>
+                                <li><a class="dropdown-item" asp-controller="BusinessExpenses" asp-action="Index">Business expenses</a></li>
+                                <li><a class="dropdown-item" asp-controller="Search" asp-action="Index">Advanced Search</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Coaching</h6></li>
+                                <li><a class="dropdown-item" asp-controller="AIAdvisor" asp-action="DebtManager">AI Debt</a></li>
+                                <li><a class="dropdown-item" asp-controller="AIAdvisor" asp-action="SavingsPlanner">AI Savings</a></li>
+                                <li><a class="dropdown-item" asp-controller="AIAdvisor" asp-action="TaxOptimization">Tax Optimization</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header">Help &amp; Privacy</h6></li>
+                                <li><a class="dropdown-item" asp-controller="Help" asp-action="Index">Help</a></li>
+                                <li><a class="dropdown-item" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+                            </ul>
+                        </li>
+                        }
+                        else
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Features</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Help" asp-action="Index">Help</a>
+                        </li>
+                        }
+                    </ul>
+
+                    <div class="dd-nav-tools">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="dd-nav-search d-none d-md-block position-relative">
+                            <i class="bi bi-search dd-search-icon" aria-hidden="true"></i>
+                            <input class="form-control" type="search" placeholder="Search…" id="global-search" autocomplete="off" aria-label="Search transactions">
+                            <div class="dropdown-menu" id="search-results" style="display: none; width: 360px; max-height: 320px; overflow-y: auto;">
+                            </div>
+                        </div>
+                        <a class="dd-tier-chip d-none d-md-inline-flex" asp-controller="Billing" asp-action="Index" title="Current plan: @ddTierName">
+                            <img src="@ddTierImg" asp-append-version="true" alt="" width="18" height="18" />
+                            <span class="dd-tier-chip-label">@ddTierName</span>
+                        </a>
+                        <button type="button" class="dd-icon-btn" title="Command palette (Ctrl+K)" aria-label="Command palette" onclick="window.__ddOpenCmd && window.__ddOpenCmd()">
+                            <i class="bi bi-command"></i>
+                        </button>
+                    }
+                    <ul class="navbar-nav align-items-lg-center">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dd-user-chip dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="userDropdown">
+                                    <span class="dd-avatar"><i class="bi bi-person-fill"></i></span>
+                                    <span class="d-none d-sm-inline">Account</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end dd-dropdown" aria-labelledby="userDropdown">
+                                    <li><h6 class="dropdown-header">@User.Identity.Name</h6></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="UserManagement">
+                                            <i class="bi bi-person-gear"></i> Manage account
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Billing" asp-action="Index">
+                                            <i class="bi bi-credit-card-2-front"></i> Billing
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Household" asp-action="Index">
+                                            <i class="bi bi-people"></i> Household
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Settings" asp-action="Index">
+                                            <i class="bi bi-gear"></i> Settings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Notifications" asp-action="Index">
+                                            <i class="bi bi-bell"></i> Notifications
+                                            <span class="badge bg-danger ms-2" id="notification-count" style="display: none;"></span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Onboarding" asp-action="Index">
+                                            <i class="bi bi-rocket-takeoff"></i> Quick Start
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><h6 class="dropdown-header">Theme</h6></li>
+                                    <li><button type="button" class="dropdown-item" data-theme-button="default"><i class="bi bi-sun"></i> Default</button></li>
+                                    <li><button type="button" class="dropdown-item" data-theme-button="ocean"><i class="bi bi-water"></i> Ocean</button></li>
+                                    <li><button type="button" class="dropdown-item" data-theme-button="forest"><i class="bi bi-tree"></i> Forest</button></li>
+                                    <li><button type="button" class="dropdown-item" data-theme-button="sunset"><i class="bi bi-sunset"></i> Sunset</button></li>
+                                    <li><button type="button" class="dropdown-item" data-theme-button="purple"><i class="bi bi-gem"></i> Purple</button></li>
+                                    <li><button type="button" class="dropdown-item" data-theme-button="dark"><i class="bi bi-moon-stars"></i> Dark</button></li>
+                                    <li><button type="button" class="dropdown-item" data-theme-button="high-contrast"><i class="bi bi-eye"></i> High contrast</button></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="post" asp-controller="Undo" asp-action="Undo" class="d-inline w-100">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Undo
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="post" asp-controller="Undo" asp-action="Redo" class="d-inline w-100">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-arrow-clockwise"></i> Redo
+                                            </button>
+                                        </form>
+                                    </li>
+                                    @{
+                                        var currentUser = await UserManager.GetUserAsync(User);
+                                        var isAdmin = currentUser?.IsAdmin == true;
+                                    }
+                                    @if (isAdmin)
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><h6 class="dropdown-header text-warning">
+                                            <i class="bi bi-shield-fill-check"></i> Admin
+                                        </h6></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">
+                                                <i class="bi bi-speedometer2"></i> Admin Dashboard
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Users">
+                                                <i class="bi bi-people-fill"></i> User Management
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="DatabaseManager">
+                                                <i class="bi bi-database"></i> Database Manager
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Settings">
+                                                <i class="bi bi-gear-fill"></i> Admin Settings
+                                            </a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                                            <button type="submit" class="dropdown-item">
+                                                <i class="bi bi-box-arrow-right text-danger"></i> Sign out
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Sign In</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link dd-nav-signup" asp-controller="Account" asp-action="Register">Sign Up</a>
+                            </li>
+                        }
+                    </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    @if (User.Identity?.IsAuthenticated != true)
+    {
+        <main role="main" class="flex-grow-1">
+            @if (ViewData["FullBleed"] as bool? == true)
+            {
+                @RenderBody()
+            }
+            else
+            {
+                <div class="container">
+                    @RenderBody()
+                </div>
+            }
+        </main>
+    }
+    else
+    {
+        <main role="main" class="flex-grow-1">
+            @RenderBody()
+        </main>
+    }
+
+    <footer class="footer border-top text-muted mt-auto">
+        <div class="container py-3">
+            &copy; 2026 - DoughDoodle - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js?v=lib-restore-20260925"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js?v=lib-restore-20260925"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <!-- Theme Management & Performance Optimizations -->
+    <script src="~/js/theme-manager.js" asp-append-version="true" defer></script>
+    <script src="~/js/command-palette.js" asp-append-version="true" defer></script>
+    <script src="~/js/swipe-transactions.js" asp-append-version="true" defer></script>
+    <script src="~/js/performance-utils.js" asp-append-version="true" defer></script>
+    
+    <!-- Initialize Bootstrap components -->
+    <script>
+        // Ensure Bootstrap dropdowns are initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+            
+            // Initialize all tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            console.log('Bootstrap components initialized:', {
+                dropdowns: dropdownList.length,
+                tooltips: tooltipList.length
+            });
+        });
+    </script>
+    
+    <!-- Global Search and Notifications Script -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            // Ensure jQuery is loaded before using it
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check if jQuery is available
+                if (typeof $ === 'undefined') {
+                    console.warn('jQuery not available, search functionality disabled');
+                    return;
+                }
+                
+                // Global search functionality
+                let searchTimeout;
+                $('#global-search').on('input', function() {
+                    const query = $(this).val();
+                    clearTimeout(searchTimeout);
+                    
+                    if (query.length < 2) {
+                        $('#search-results').hide();
+                        return;
+                    }
+                    
+                    searchTimeout = setTimeout(() => {
+                        $.get('/Search/QuickSearch', { term: query })
+                            .done(function(data) {
+                                const results = data.results || [];
+                                let html = '';
+                                
+                                if (results.length === 0) {
+                                    html = '<div class="dropdown-item-text">No results found</div>';
+                                } else {
+                                    results.forEach(result => {
+                                        html += `<a class="dropdown-item" href="${result.url}">
+                                            <div><strong>${result.title}</strong></div>
+                                            <small class="text-muted">${result.subtitle}</small>
+                                        </a>`;
+                                    });
+                                    html += `<div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="/Search?Query=${encodeURIComponent(query)}">
+                                                <i class="bi bi-search"></i> View all results
+                                            </a>`;
+                                }
+                                
+                                $('#search-results').html(html).show();
+                            })
+                            .fail(function() {
+                                $('#search-results').html('<div class="dropdown-item-text text-danger">Search temporarily unavailable</div>').show();
+                            });
+                    }, 300);
+                });
+                
+                // Hide search results when clicking outside
+                $(document).on('click', function(e) {
+                    if (!$(e.target).closest('#global-search, #search-results').length) {
+                        $('#search-results').hide();
+                    }
+                });
+                
+                // Load notification count with better error handling
+                function updateNotificationCount() {
+                    $.get('/Notifications/GetUnreadCount')
+                        .done(function(data) {
+                            if (data && data.count > 0) {
+                                $('#notification-count').text(data.count).show();
+                            } else {
+                                $('#notification-count').hide();
+                            }
+                        })
+                        .fail(function(xhr, status, error) {
+                            console.warn('Notification count update failed:', error);
+                            // Don't show error to user for this non-critical feature
+                        });
+                }
+                
+                // Update notification count on page load and every 30 seconds
+                updateNotificationCount();
+                const notificationInterval = setInterval(updateNotificationCount, 30000);
+                
+                // Clean up interval when page is about to be unloaded
+                window.addEventListener('beforeunload', function() {
+                    clearInterval(notificationInterval);
+                });
+            });
+        </script>
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        // PWA: service-worker.js (doughdoodle-v11) — network-only for HTML navigations
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/service-worker.js').catch(function () {});
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+@model IEnumerable<DoughDoodle.Models.CollaborativeComment>
+<div class="comment-thread">
+@foreach (var c in Model) {
+  <div class="border rounded p-2 mb-2">
+    <div class="small text-muted">@c.User?.FullName · @c.CreatedAt.ToString("u")</div>
+    <div>@c.Body</div>
+  </div>
+}
+</div>

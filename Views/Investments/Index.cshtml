@@ -1,0 +1,138 @@
+@model List<DoughDoodle.Models.InvestmentAccount>
+@{
+    ViewData["Title"] = "Investment Portfolio";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-graph-up-arrow text-success"></i> Investment Portfolio</h1>
+            <p class="text-muted">Track your investment accounts and portfolio performance</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Investment Account
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Portfolio Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Portfolio Value</h6>
+                    <h3 class="mb-0">@CurrencyDisplay.Format(ViewBag.TotalValue, ViewData["PreferredCurrency"] as string)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-secondary">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Cost Basis</h6>
+                    <h3 class="mb-0">@CurrencyDisplay.Format(ViewBag.TotalCost, ViewData["PreferredCurrency"] as string)</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card @(ViewBag.TotalGainLoss >= 0 ? "border-success" : "border-danger")">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total Gain/Loss</h6>
+                    <h3 class="mb-0 @(ViewBag.TotalGainLoss >= 0 ? "text-success" : "text-danger")">
+                        @CurrencyDisplay.Format(ViewBag.TotalGainLoss, ViewData["PreferredCurrency"] as string)
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card @(ViewBag.TotalGainLossPercentage >= 0 ? "border-success" : "border-danger")">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Return</h6>
+                    <h3 class="mb-0 @(ViewBag.TotalGainLossPercentage >= 0 ? "text-success" : "text-danger")">
+                        @ViewBag.TotalGainLossPercentage.ToString("F2")%
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> You haven't added any investment accounts yet. Click "Add Investment Account" to get started tracking your portfolio.
+        </div>
+    }
+    else
+    {
+        <!-- Investment Accounts List -->
+        <div class="row">
+            @foreach (var account in Model)
+            {
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-briefcase"></i> @account.Name
+                                </h5>
+                                <span class="badge bg-primary">@account.InvestmentType</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Current Value</small>
+                                    <p class="mb-0 fw-bold">@CurrencyDisplay.Format(account.CurrentValue, ViewData["PreferredCurrency"] as string)</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Cost Basis</small>
+                                    <p class="mb-0">@CurrencyDisplay.Format(account.CostBasis, ViewData["PreferredCurrency"] as string)</p>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted">Gain/Loss</small>
+                                    <p class="mb-0 @(account.GainLoss >= 0 ? "text-success" : "text-danger")">
+                                        @CurrencyDisplay.Format(account.GainLoss, ViewData["PreferredCurrency"] as string)
+                                    </p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Return</small>
+                                    <p class="mb-0 @(account.GainLossPercentage >= 0 ? "text-success" : "text-danger")">
+                                        @account.GainLossPercentage.ToString("F2")%
+                                    </p>
+                                </div>
+                            </div>
+                            @if (!string.IsNullOrEmpty(account.InstitutionName))
+                            {
+                                <p class="mb-2"><small class="text-muted">Institution:</small> @account.InstitutionName</p>
+                            }
+                            @if (account.Holdings.Any())
+                            {
+                                <p class="mb-2"><small class="text-muted">Holdings:</small> @account.Holdings.Count positions</p>
+                            }
+                            @if (!string.IsNullOrEmpty(account.Description))
+                            {
+                                <p class="mb-0"><small>@account.Description</small></p>
+                            }
+                        </div>
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="Edit" asp-route-id="@account.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <small class="text-muted align-self-center">Updated: @account.LastUpdated.ToShortDateString()</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,123 @@
+@model List<DoughDoodle.Models.CategoryRollover>
+@{
+    ViewData["Title"] = "Rollover Preview";
+    var fromMonth = ViewBag.FromMonth as string ?? DateTime.Now.AddMonths(-1).ToString("yyyy-MM");
+    var toMonth = ViewBag.ToMonth as string ?? DateTime.Now.ToString("yyyy-MM");
+    var fromLabel = DateTime.ParseExact(fromMonth + "-01", "yyyy-MM-dd", null).ToString("MMMM yyyy");
+    var toLabel = DateTime.ParseExact(toMonth + "-01", "yyyy-MM-dd", null).ToString("MMMM yyyy");
+    var totalSurplus = Model.Where(r => !r.IsOverspend).Sum(r => r.Amount);
+    var totalOverspend = Model.Where(r => r.IsOverspend).Sum(r => Math.Abs(r.Amount));
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-arrow-right-circle"></i> Rollover Preview: @fromLabel → @toLabel</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No surplus or overspend amounts to roll over from @fromLabel.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Total Surplus</h6>
+                                        <h3 class="text-success mb-0">@CurrencyDisplay.Format(totalSurplus, ViewData["PreferredCurrency"] as string)</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-danger">
+                                    <div class="card-body text-center">
+                                        <h6 class="text-muted">Total Overspend</h6>
+                                        <h3 class="text-danger mb-0">@CurrencyDisplay.Format(totalOverspend, ViewData["PreferredCurrency"] as string)</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive mb-4">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Type</th>
+                                        <th class="text-end">Amount</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var rollover in Model.OrderBy(r => r.Category?.Name))
+                                    {
+                                        <tr>
+                                            <td>@(rollover.Category?.Name ?? "Unknown")</td>
+                                            <td>
+                                                @if (rollover.IsOverspend)
+                                                {
+                                                    <span class="badge bg-danger">Overspend</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">Surplus</span>
+                                                }
+                                            </td>
+                                            <td class="text-end @(rollover.IsOverspend ? "text-danger" : "text-success")">
+                                                @CurrencyDisplay.Format(rollover.Amount, ViewData["PreferredCurrency"] as string)
+                                            </td>
+                                            <td><small class="text-muted">@rollover.Notes</small></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <form asp-action="ApproveRollover" method="post" class="d-inline">
+                            <input type="hidden" name="fromMonth" value="@fromMonth" />
+                            @Html.AntiForgeryToken()
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="MonthlyWorkflow" asp-route-monthYear="@toMonth" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Budget
+                                </a>
+                                <button type="submit" class="btn btn-success" onclick="return confirm('Approve rollover from @fromLabel to @toLabel?')">
+                                    <i class="bi bi-check-circle"></i> Approve Rollover
+                                </button>
+                            </div>
+                        </form>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <div class="mt-3">
+                            <a asp-action="MonthlyWorkflow" asp-route-monthYear="@toMonth" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Budget
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,113 @@
+@model DoughDoodle.Models.ScheduledTransfer
+@{
+    ViewData["Title"] = "Schedule Transfer";
+    var categories = ViewBag.Categories as List<DoughDoodle.Models.Category> ?? new List<DoughDoodle.Models.Category>();
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-plus-circle"></i> Schedule New Transfer</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" placeholder="e.g., Move to Emergency Fund" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Amount" class="form-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                                        <input asp-for="Amount" class="form-control" />
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Frequency" class="form-label"></label>
+                                    <select asp-for="Frequency" class="form-select"
+                                            asp-items="Html.GetEnumSelectList<DoughDoodle.Models.TransferFrequency>()"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="FromCategoryId" class="form-label">From Category</label>
+                                    <select asp-for="FromCategoryId" class="form-select">
+                                        <option value="">Select source...</option>
+                                        @foreach (var category in categories)
+                                        {
+                                            <option value="@category.Id">@category.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="ToCategoryId" class="form-label">To Category</label>
+                                    <select asp-for="ToCategoryId" class="form-select">
+                                        <option value="">Select destination...</option>
+                                        @foreach (var category in categories)
+                                        {
+                                            <option value="@category.Id">@category.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="NextTransferDate" class="form-label">Next Transfer Date</label>
+                                    <input asp-for="NextTransferDate" type="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="EndDate" class="form-label">End Date (optional)</label>
+                                    <input asp-for="EndDate" type="date" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label"></label>
+                            <textarea asp-for="Notes" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Schedule Transfer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

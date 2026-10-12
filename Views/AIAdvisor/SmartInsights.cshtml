@@ -1,0 +1,301 @@
+@{
+    ViewData["Title"] = "AI Smart Insights";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="bi bi-graph-up-arrow"></i> AI Smart Insights</h2>
+                    <p class="mb-0">Advanced spending pattern analysis and anomaly detection</p>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button id="analyzeSpendingBtn" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="bi bi-search"></i> Analyze Spending Patterns
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button id="getCoachingBtn" class="btn btn-info btn-lg w-100 mb-3">
+                                <i class="bi bi-person-heart"></i> Get Personal Coach
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Spending Analysis Results -->
+                    <div id="spendingAnalysisResults" class="mt-4" style="display: none;">
+                        <div class="card bg-light">
+                            <div class="card-header">
+                                <h5><i class="bi bi-bar-chart-fill"></i> Spending Pattern Analysis</h5>
+                                <div id="healthScoreDisplay" class="float-end"></div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6><i class="bi bi-pattern"></i> Detected Patterns</h6>
+                                        <div id="detectedPatterns"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6><i class="bi bi-exclamation-triangle"></i> Spending Anomalies</h6>
+                                        <div id="spendingAnomalies"></div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-lightbulb"></i> Optimization Suggestions</h6>
+                                    <div id="optimizationSuggestions"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Coaching Results -->
+                    <div id="financialCoachingResults" class="mt-4" style="display: none;">
+                        <div class="card bg-success text-white">
+                            <div class="card-header">
+                                <h5><i class="bi bi-person-check"></i> Your Personal Financial Coach</h5>
+                                <small id="coachPersonality" class="text-light"></small>
+                            </div>
+                            <div class="card-body">
+                                <div id="mainCoachingMessage" class="mb-3"></div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6><i class="bi bi-trophy"></i> Milestones & Achievements</h6>
+                                        <div id="coachingMilestones"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6><i class="bi bi-check2-square"></i> Quick Action Items</h6>
+                                        <div id="coachingActionItems"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <h6><i class="bi bi-stars"></i> Personalized Tips</h6>
+                                    <div id="personalizedTips"></div>
+                                </div>
+
+                                <div class="mt-3 p-3 bg-white text-dark rounded">
+                                    <h6><i class="bi bi-quote"></i> Daily Motivation</h6>
+                                    <div id="motivationalQuote" class="fst-italic"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Quick Stats -->
+            <div class="card border-info mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0"><i class="bi bi-speedometer2"></i> Quick Stats</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-end">
+                                <h4 class="text-primary" id="totalTransactions">-</h4>
+                                <small>Transactions</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success" id="avgTransactionAmount">-</h4>
+                            <small>Avg Amount</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Features Guide -->
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="bi bi-robot"></i> AI Features</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>🔍 Pattern Analysis</strong>
+                        <p class="small mb-2">Identifies your spending habits, recurring patterns, and unusual transactions.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>🚨 Anomaly Detection</strong>
+                        <p class="small mb-2">Spots transactions that deviate from your normal spending behavior.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>👨‍💼 Personal Coach</strong>
+                        <p class="small mb-2">AI-powered financial advisor that adapts to your goals and spending style.</p>
+                    </div>
+
+                    <div class="alert alert-info p-2">
+                        <small><i class="bi bi-info-circle"></i> <strong>Smart Fallbacks:</strong> All features work even without an API connection.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)));
+let spendingData = null;
+let coachingData = null;
+
+document.getElementById('analyzeSpendingBtn').addEventListener('click', analyzeSpendingPatterns);
+document.getElementById('getCoachingBtn').addEventListener('click', getPersonalizedCoaching);
+
+async function analyzeSpendingPatterns() {
+    const button = document.getElementById('analyzeSpendingBtn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing Patterns...';
+    button.disabled = true;
+
+    try {
+        const response = await fetch('/AIAdvisor/AnalyzeSpendingPatterns');
+        spendingData = await response.json();
+        
+        displaySpendingAnalysis(spendingData);
+        updateQuickStats();
+    } catch (error) {
+        console.error('Error analyzing spending patterns:', error);
+        alert('Unable to analyze spending patterns at this time. Please check your connection.');
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+async function getPersonalizedCoaching() {
+    const button = document.getElementById('getCoachingBtn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Consulting Coach...';
+    button.disabled = true;
+
+    try {
+        const response = await fetch('/AIAdvisor/GetPersonalizedCoaching');
+        coachingData = await response.json();
+        
+        displayFinancialCoaching(coachingData);
+    } catch (error) {
+        console.error('Error getting coaching advice:', error);
+        alert('Unable to get coaching advice at this time. Please check your connection.');
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+function displaySpendingAnalysis(data) {
+    // Health Score
+    const healthScoreElement = document.getElementById('healthScoreDisplay');
+    const healthColor = data.overallHealthScore >= 80 ? 'success' : data.overallHealthScore >= 60 ? 'warning' : 'danger';
+    healthScoreElement.innerHTML = `<span class="badge bg-${healthColor}">Health Score: ${Math.round(data.overallHealthScore)}</span>`;
+
+    // Detected Patterns
+    const patternsElement = document.getElementById('detectedPatterns');
+    let patternsHtml = '';
+    data.detectedPatterns.forEach(pattern => {
+        patternsHtml += `
+            <div class="border rounded p-2 mb-2">
+                <strong>${pattern.patternType}</strong> - ${pattern.frequency}
+                <br><small class="text-muted">${pattern.description}</small>
+                <br><small class="text-success">Impact: ${currencySymbol}${pattern.impact.toFixed(2)}</small>
+            </div>
+        `;
+    });
+    patternsElement.innerHTML = patternsHtml || '<p class="text-muted">No significant patterns detected.</p>';
+
+    // Anomalies
+    const anomaliesElement = document.getElementById('spendingAnomalies');
+    let anomaliesHtml = '';
+    data.anomalies.forEach(anomaly => {
+        anomaliesHtml += `
+            <div class="border border-warning rounded p-2 mb-2">
+                <strong>${anomaly.category}</strong> - ${anomaly.anomalyType}
+                <br><span class="text-danger">${currencySymbol}${anomaly.amount.toFixed(2)}</span> on ${new Date(anomaly.date).toLocaleDateString()}
+                <br><small class="text-muted">${anomaly.explanation}</small>
+            </div>
+        `;
+    });
+    anomaliesElement.innerHTML = anomaliesHtml || '<p class="text-muted">No anomalies detected - great job!</p>';
+
+    // Optimization Suggestions
+    const suggestionsElement = document.getElementById('optimizationSuggestions');
+    let suggestionsHtml = '<ul class="list-unstyled">';
+    data.optimizationSuggestions.forEach(suggestion => {
+        suggestionsHtml += `<li><i class="bi bi-check-circle text-success"></i> ${suggestion}</li>`;
+    });
+    suggestionsHtml += '</ul>';
+    suggestionsElement.innerHTML = suggestionsHtml;
+
+    document.getElementById('spendingAnalysisResults').style.display = 'block';
+}
+
+function displayFinancialCoaching(data) {
+    document.getElementById('coachPersonality').textContent = `Your ${data.coachPersonality} Coach`;
+    document.getElementById('mainCoachingMessage').innerHTML = `<h6>${data.mainMessage}</h6>`;
+
+    // Milestones
+    const milestonesElement = document.getElementById('coachingMilestones');
+    let milestonesHtml = '';
+    data.milestones.forEach(milestone => {
+        milestonesHtml += `
+            <div class="border border-light rounded p-2 mb-2">
+                <strong>${milestone.achievement}</strong>
+                <br><span class="text-light">${milestone.celebration}</span>
+                <br><small>${milestone.nextGoal}</small>
+            </div>
+        `;
+    });
+    milestonesElement.innerHTML = milestonesHtml || '<p>Keep working towards your goals! 🎯</p>';
+
+    // Action Items
+    const actionItemsElement = document.getElementById('coachingActionItems');
+    let actionHtml = '';
+    data.actionItems.forEach(item => {
+        const priorityColor = item.priority === 'High' ? 'danger' : item.priority === 'Medium' ? 'warning' : 'info';
+        actionHtml += `
+            <div class="border border-light rounded p-2 mb-2">
+                <span class="badge bg-${priorityColor}">${item.priority}</span>
+                <strong>${item.task}</strong>
+                <br><small>~${item.estimatedMinutes} min - ${item.expectedBenefit}</small>
+            </div>
+        `;
+    });
+    actionItemsElement.innerHTML = actionHtml;
+
+    // Personalized Tips
+    const tipsElement = document.getElementById('personalizedTips');
+    let tipsHtml = '';
+    data.personalizedTips.forEach(tip => {
+        tipsHtml += `
+            <div class="border border-light rounded p-2 mb-2">
+                <strong>${tip.title}</strong> - ${tip.category}
+                <br><span class="text-light">${tip.advice}</span>
+                ${tip.potentialSavings > 0 ? `<br><small class="text-warning">💰 Potential savings: ${currencySymbol}${tip.potentialSavings}</small>` : ''}
+            </div>
+        `;
+    });
+    tipsElement.innerHTML = tipsHtml;
+
+    document.getElementById('motivationalQuote').textContent = data.motivationalQuote;
+    document.getElementById('financialCoachingResults').style.display = 'block';
+}
+
+function updateQuickStats() {
+    if (spendingData && spendingData.detectedPatterns) {
+        // Calculate some basic stats from the spending analysis
+        const totalImpact = spendingData.detectedPatterns.reduce((sum, pattern) => sum + pattern.impact, 0);
+        document.getElementById('totalTransactions').textContent = spendingData.detectedPatterns.length;
+        document.getElementById('avgTransactionAmount').textContent = currencySymbol + (totalImpact / Math.max(1, spendingData.detectedPatterns.length)).toFixed(0);
+    }
+}
+
+// Load initial data
+document.addEventListener('DOMContentLoaded', function() {
+    // You could auto-load some data here if desired
+});
+</script>

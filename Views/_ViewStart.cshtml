@@ -1,0 +1,5 @@
+@{
+    Layout = "_Layout";
+    var currentUser = await UserManager.GetUserAsync(User);
+    ViewData["PreferredCurrency"] = CurrencyDisplay.Normalize(currentUser?.PreferredCurrency);
+}

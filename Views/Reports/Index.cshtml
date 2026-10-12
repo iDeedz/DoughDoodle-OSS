@@ -1,0 +1,207 @@
+@using DoughDoodle.Helpers
+@{
+    ViewData["Title"] = "Reports Overview";
+    var cc = (ViewBag.PreferredCurrency as string) ?? "USD";
+    var curSym = CurrencyDisplay.Symbol(cc);
+}
+
+<div class="container-fluid dd-reports dd-dashboard">
+    <div class="dd-page-header dd-fade-up">
+        <div>
+            <div class="dd-accent-bar"></div>
+            <h1>Reports</h1>
+            <p class="dd-subtitle">Spending patterns and monthly totals in @cc</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="TrendAnalysis" class="btn btn-primary btn-sm">
+                <i class="bi bi-graph-up-arrow"></i> Trend analysis
+            </a>
+            <a asp-action="CashFlow" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-cash-stack"></i> Cash flow
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4 dd-stagger">
+        <div class="col-md-4">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Categories</div>
+                        <div class="dd-metric-value" id="categoryCount">—</div>
+                        <div class="dd-metric-meta">Active spend buckets</div>
+                    </div>
+                    <div class="dd-metric-icon teal"><i class="bi bi-pie-chart"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">This month</div>
+                        <div class="dd-metric-value" id="monthlyTotal">—</div>
+                        <div class="dd-metric-meta">Total spending</div>
+                    </div>
+                    <div class="dd-metric-icon coral"><i class="bi bi-calendar-month"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Average</div>
+                        <div class="dd-metric-value" id="averageSpending">—</div>
+                        <div class="dd-metric-meta">Per category</div>
+                    </div>
+                    <div class="dd-metric-icon gold"><i class="bi bi-graph-up"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-pie-chart me-1" style="color: var(--dd-mint);"></i> Category spending</span>
+                </div>
+                <div class="card-body pt-0">
+                    <div id="categoryChart" class="dd-empty py-4" style="border:none;background:transparent;padding:1rem;">
+                        <p class="text-muted mb-0 small">Open Trend analysis for interactive charts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-transparent border-0">
+                    <span><i class="bi bi-bar-chart me-1" style="color: var(--dd-mint);"></i> Monthly totals</span>
+                </div>
+                <div class="card-body pt-0">
+                    <div id="monthlyChart" class="dd-empty py-4" style="border:none;background:transparent;padding:1rem;">
+                        <p class="text-muted mb-0 small">Open Trend analysis for interactive charts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-transparent border-0">
+                    <span><i class="bi bi-table me-1"></i> Category details</span>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm dd-table align-middle mb-0" id="categoryTable">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Amount</th>
+                                    <th class="text-end">%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">Loading…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-transparent border-0">
+                    <span><i class="bi bi-calendar me-1"></i> Monthly details</span>
+                </div>
+                <div class="card-body pt-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm dd-table align-middle mb-0" id="monthlyTable">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted py-4">Loading…</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryData = @Html.Raw(ViewBag.CategorySpentJson ?? "[]");
+    const monthlyData = @Html.Raw(ViewBag.MonthlyTotalsJson ?? "[]");
+    const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(curSym));
+
+    function money(n) {
+        return currencySymbol + Math.abs(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+    }
+
+    if (categoryData.length > 0) {
+        const totalSpending = categoryData.reduce((sum, item) => sum + Math.abs(item.Spent), 0);
+        const averageSpending = totalSpending / categoryData.length;
+        document.getElementById('categoryCount').textContent = categoryData.length;
+        document.getElementById('averageSpending').textContent = money(averageSpending);
+
+        const tableBody = document.querySelector('#categoryTable tbody');
+        tableBody.innerHTML = '';
+        categoryData
+            .sort((a, b) => Math.abs(b.Spent) - Math.abs(a.Spent))
+            .forEach(item => {
+                const percentage = totalSpending > 0 ? ((Math.abs(item.Spent) / totalSpending) * 100).toFixed(1) : 0;
+                const row = tableBody.insertRow();
+                row.innerHTML =
+                    '<td>' + item.Category + '</td>' +
+                    '<td class="text-end font-monospace">' + money(item.Spent) + '</td>' +
+                    '<td class="text-end">' + percentage + '%</td>';
+            });
+    } else {
+        document.getElementById('categoryCount').textContent = '0';
+        document.getElementById('averageSpending').textContent = money(0);
+        document.querySelector('#categoryTable tbody').innerHTML =
+            '<tr><td colspan="3"><div class="dd-empty py-4" style="border:none;background:transparent;">' +
+            '<h4 class="h6">No category spend yet</h4>' +
+            '<p class="mb-2">Import a CSV or log transactions to fill this table.</p>' +
+            '<a class="btn btn-primary btn-sm" href="/ImportExport">Import CSV</a></div></td></tr>';
+    }
+
+    if (monthlyData.length > 0) {
+        const currentMonth = monthlyData[monthlyData.length - 1];
+        document.getElementById('monthlyTotal').textContent = money(currentMonth.Total);
+
+        const tableBody = document.querySelector('#monthlyTable tbody');
+        tableBody.innerHTML = '';
+        monthlyData
+            .sort((a, b) => b.Month.localeCompare(a.Month))
+            .forEach(item => {
+                const monthName = new Date(item.Month + '-01').toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                const row = tableBody.insertRow();
+                row.innerHTML =
+                    '<td>' + monthName + '</td>' +
+                    '<td class="text-end font-monospace">' + money(item.Total) + '</td>';
+            });
+    } else {
+        document.getElementById('monthlyTotal').textContent = money(0);
+        document.querySelector('#monthlyTable tbody').innerHTML =
+            '<tr><td colspan="2"><div class="dd-empty py-4" style="border:none;background:transparent;">' +
+            '<h4 class="h6">No monthly totals yet</h4>' +
+            '<p class="mb-0">Spend shows up here once envelopes have transactions.</p></div></td></tr>';
+    }
+});
+</script>
+}

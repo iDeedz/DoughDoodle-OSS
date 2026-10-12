@@ -1,0 +1,122 @@
+@model DoughDoodle.Controllers.BillingPageViewModel
+@{
+    ViewData["Title"] = "Dough Tiers — Billing";
+}
+
+<div class="container py-4">
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-8">
+            <p class="text-uppercase text-muted small mb-1"><i class="bi bi-credit-card-2-front"></i> Plans & billing</p>
+            <h1 class="mb-2">Choose the plan that fits your dough.</h1>
+            <p class="text-muted mb-0">Pocket is free forever. Paid tiers unlock depth — household seats, coaching insights, investments, longer history. Entitlements come from Stripe webhooks, never the browser.</p>
+        </div>
+        <div class="col-lg-4 text-center">
+            <img src="~/images/branding/hero-dough.svg" asp-append-version="true" alt="Cash clarity — dough left today and paper envelopes" class="img-fluid dd-landing-art" style="max-height:180px" width="420" height="180" />
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] is string err)
+    {
+        <div class="alert alert-danger">@err</div>
+    }
+    @if (Model.CheckoutSuccess)
+    {
+        <div class="alert alert-success">Checkout completed. Your dough unlocks after Stripe confirms (usually seconds). Refresh if you still see Pocket.</div>
+    }
+    @if (Model.CheckoutCanceled)
+    {
+        <div class="alert alert-secondary">Checkout canceled — no charge. You stay on your current plan.</div>
+    }
+
+    @if (!Model.StripeConfigured)
+    {
+        <div class="alert alert-warning d-flex gap-2 align-items-start">
+            <i class="bi bi-key fs-4"></i>
+            <div>
+                <strong>Stripe setup pending.</strong> Checkout is disabled until SecretKey, PublishableKey, Domain, and Price IDs are configured in <code>appsettings</code> or environment variables. Pocket stays free forever — no nagging, no fake paywall.
+            </div>
+        </div>
+    }
+
+    <div class="alert alert-info mb-4 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <img src="~/images/branding/logo-mark.svg" asp-append-version="true" alt="" width="36" height="36" />
+            <div>
+                <strong>Current plan:</strong> @Model.CurrentPackName
+                @if (!string.IsNullOrWhiteSpace(Model.SubscriptionStatus) && Model.CurrentTier != DoughDoodle.Models.DoughTier.Pocket)
+                {
+                    <span class="ms-1">(status: @Model.SubscriptionStatus)</span>
+                }
+                @if (Model.PeriodEnd.HasValue && Model.CurrentTier != DoughDoodle.Models.DoughTier.Pocket)
+                {
+                    <span class="ms-1">· period ends @Model.PeriodEnd.Value.ToLocalTime().ToString("d MMM yyyy")</span>
+                }
+            </div>
+        </div>
+        @if (Model.HasCustomer && Model.StripeConfigured)
+        {
+            <form method="post" asp-action="Portal" class="mb-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Manage billing</button>
+            </form>
+        }
+    </div>
+
+    <div class="row g-3 mb-4">
+        @foreach (var pack in Model.Packs)
+        {
+            <div class="col-12 col-md-6 col-xl">
+                <div class="card h-100 shadow-sm dd-pack-card @pack.AccentClass @(pack.IsCurrent ? "border-success border-2" : "")">
+                    <div class="card-body d-flex flex-column">
+                        <div class="text-center mb-3">
+                            <img src="@pack.ImageSrc" asp-append-version="true" alt="@pack.Name badge" width="120" height="120" />
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h2 class="h4 mb-1">@pack.Name</h2>
+                                <div class="fw-semibold text-primary">@pack.PriceLabel</div>
+                            </div>
+                            @if (pack.IsCurrent)
+                            {
+                                <span class="badge bg-success">Current</span>
+                            }
+                            else if (pack.IsFree)
+                            {
+                                <span class="badge bg-secondary">Free</span>
+                            }
+                        </div>
+                        <p class="small text-muted">@pack.Tagline</p>
+                        <ul class="small flex-grow-1 ps-3">
+                            @foreach (var f in pack.Features)
+                            {
+                                <li>@f</li>
+                            }
+                        </ul>
+                        @if (pack.IsFree)
+                        {
+                            <button class="btn btn-outline-secondary w-100" disabled>Included forever</button>
+                        }
+                        else if (!Model.StripeConfigured)
+                        {
+                            <button class="btn btn-outline-warning w-100" disabled title="Configure Stripe keys first">Checkout unavailable</button>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(pack.MonthlyPriceId))
+                        {
+                            <form method="post" asp-action="Checkout" class="mt-auto">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="priceId" value="@pack.MonthlyPriceId" />
+                                <button type="submit" class="btn btn-primary w-100" @(pack.IsCurrent ? "disabled" : null)>
+                                    @(pack.IsCurrent ? "Current plan" : "Choose plan")
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button class="btn btn-outline-secondary w-100" disabled>Price ID not set</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

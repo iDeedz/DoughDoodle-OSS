@@ -1,0 +1,72 @@
+@model IEnumerable<DoughDoodle.Models.BankConnection>
+@{ ViewData["Title"] = "Bank connections"; }
+<h2><i class="bi bi-bank"></i> Bank connections</h2>
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+<div class="alert alert-info">
+  <strong>Honest path:</strong> Live Open Banking / Plaid Link sync needs API keys + Link wiring.
+  Without keys, use <a asp-controller="ImportExport" asp-action="Index">CSV / OFX / QFX / QIF import</a> — that is the real bank path today.
+</div>
+<div class="row g-3">
+  <div class="col-md-5">
+    <div class="card"><div class="card-body">
+      <h5>Add connection</h5>
+      <form method="post" asp-action="Connect">
+        @Html.AntiForgeryToken()
+        <div class="mb-2"><label class="form-label">Display name</label><input name="displayName" class="form-control" placeholder="Checking" /></div>
+        <div class="mb-2"><label class="form-label">Provider</label>
+          <select name="provider" class="form-select">
+            <option value="ManualCsv">Manual / CSV</option>
+            <option value="Plaid">Plaid (requires keys)</option>
+          </select>
+        </div>
+        <div class="mb-2"><label class="form-label">Linked account</label>
+          <select name="accountId" class="form-select">
+            <option value="">—</option>
+            @foreach (var a in (IEnumerable<DoughDoodle.Models.Account>)ViewBag.Accounts) {
+              <option value="@a.Id">@a.Name</option>
+            }
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="bankConnectBtn">Save Manual / CSV connection</button>
+        <div class="form-text mt-2">Plaid live sync stays off until ClientId/Secret + Link are configured. Manual connections point you to Import/Export.</div>
+        <script>
+          (function () {
+            var sel = document.querySelector('select[name="provider"]');
+            var btn = document.getElementById('bankConnectBtn');
+            if (!sel || !btn) return;
+            function sync() {
+              btn.textContent = sel.value === 'Plaid'
+                ? 'Record Plaid connection (keys required)'
+                : 'Save Manual / CSV connection';
+            }
+            sel.addEventListener('change', sync);
+            sync();
+          })();
+        </script>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-md-7">
+    <div class="card"><div class="card-body">
+      <h5>Your connections</h5>
+      <table class="table table-sm"><thead><tr><th>Name</th><th>Provider</th><th>Last sync</th><th></th></tr></thead>
+      <tbody>
+      @foreach (var c in Model) {
+        <tr>
+          <td>@c.DisplayName</td>
+          <td>@c.Provider</td>
+          <td>@(c.LastSyncedAt?.ToString("u") ?? "—")</td>
+          <td>
+            <form method="post" asp-action="Sync" class="d-inline">
+              @Html.AntiForgeryToken()
+              <input type="hidden" name="id" value="@c.Id" />
+              <button class="btn btn-outline-secondary btn-sm">Sync</button>
+            </form>
+          </td>
+        </tr>
+      }
+      </tbody></table>
+    </div></div>
+  </div>
+</div>

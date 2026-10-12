@@ -1,0 +1,8 @@
+bin/
+obj/
+budget.db*
+.git/
+.github/
+docs/
+*.md
+Tests/

@@ -1,0 +1,189 @@
+@model DoughDoodle.Models.ViewModels.UserManagementViewModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container-fluid dd-dashboard">
+    <div class="dd-page-header dd-fade-up">
+        <div>
+            <div class="dd-accent-bar"></div>
+            <h1>Account</h1>
+            <p class="dd-subtitle">Manage your main account and household sub-accounts</p>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-8">
+
+            <!-- Account Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-person-circle"></i> Your Account</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Name:</strong> @Model.CurrentUser.FullName<br>
+                            <strong>Email:</strong> @Model.CurrentUser.Email<br>
+                            <strong>Account Type:</strong> @Model.CurrentUser.UserType<br>
+                            <strong>Member Since:</strong> @Model.CurrentUser.CreatedAt.ToString("MMM dd, yyyy")
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Plan:</strong> @Model.PlanDisplayName<br>
+                            <strong>Sub-Accounts Used:</strong> @Model.UsedSubAccounts / @Model.SubAccountLimit
+                            <div class="progress mt-1">
+                                <div class="progress-bar" style="width: @((Model.UsedSubAccounts / (double)Model.SubAccountLimit) * 100)%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Accounts Management -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-people"></i> Sub-Accounts (@Model.SubAccounts.Count)</h5>
+                    @if (Model.CanCreateSubAccount)
+                    {
+                        <a asp-action="CreateSubAccount" class="btn btn-success">
+                            <i class="bi bi-person-plus"></i> Add Sub-Account
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning">Limit Reached</span>
+                    }
+                </div>
+                <div class="card-body">
+                    @if (Model.SubAccounts.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm dd-table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Created</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var subAccount in Model.SubAccounts)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@subAccount.FullName</strong>
+                                            </td>
+                                            <td>@subAccount.Email</td>
+                                            <td>@subAccount.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                @if (subAccount.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Active</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactive</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="ViewSubAccountBudget" asp-route-subAccountId="@subAccount.Id" 
+                                                       class="btn btn-sm btn-outline-info" title="View Budget">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    @if (subAccount.IsActive)
+                                                    {
+                                                        <form asp-action="DeactivateSubAccount" method="post" style="display: inline;">
+                                                            <input type="hidden" name="subAccountId" value="@subAccount.Id" />
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                                    title="Deactivate" 
+                                                                    onclick="return confirm('Are you sure you want to deactivate this sub-account?')">
+                                                                <i class="bi bi-person-x"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="dd-empty">
+                            <i class="bi bi-people fs-1 text-muted"></i>
+                            <h4 class="h6 mt-2">No sub-accounts yet</h4>
+                            <p>Add a household seat to share envelopes without sharing your login.</p>
+                            @if (Model.CanCreateSubAccount)
+                            {
+                                <a asp-action="CreateSubAccount" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-person-plus"></i> Create first sub-account
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Billing" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                                    Upgrade for more seats
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle"></i> Account Benefits</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="small text-uppercase text-muted">Pocket includes</h6>
+                    <ul class="list-unstyled small mb-3">
+                        <li><i class="bi bi-check-circle text-success"></i> Envelopes + dough-left today</li>
+                        <li><i class="bi bi-check-circle text-success"></i> CSV / OFX import</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Goals + monthly reports</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Free forever on Pocket</li>
+                    </ul>
+                    <hr>
+                    <h6 class="small text-uppercase text-muted">Upgrade unlocks</h6>
+                    <ul class="list-unstyled small mb-3">
+                        <li><i class="bi bi-star text-warning"></i> Bankroll+: household seats by tier</li>
+                        <li><i class="bi bi-star text-warning"></i> Advanced reporting</li>
+                        <li><i class="bi bi-star text-warning"></i> Deeper history + exports</li>
+                    </ul>
+                    <a asp-controller="Billing" asp-action="Index" class="btn btn-primary btn-sm">
+                        <i class="bi bi-arrow-up-circle"></i> View plans
+                    </a>
+                    <p class="small text-muted mt-2 mb-0">Current plan: <strong>@Model.PlanDisplayName</strong></p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-question-circle"></i> Quick Help</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Managing Sub-Accounts:</h6>
+                    <ul class="small">
+                        <li>Sub-accounts can manage their own budgets independently</li>
+                        <li>You can view (but not edit) all sub-account budgets</li>
+                        <li>Sub-accounts cannot create additional sub-accounts</li>
+                        <li>Deactivated accounts retain their data but cannot sign in</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        <i class="bi bi-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}

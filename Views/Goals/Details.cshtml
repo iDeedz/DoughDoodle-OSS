@@ -1,0 +1,143 @@
+@model DoughDoodle.Models.FinancialGoal
+@{
+    ViewData["Title"] = "Goal Details";
+    var cc = CurrencyDisplay.Normalize(ViewData["PreferredCurrency"] as string);
+    var curSym = CurrencyDisplay.Symbol(cc);
+    var progressPercentage = Model.TargetAmount > 0 ? (double)(Model.CurrentAmount / Model.TargetAmount) * 100 : 0;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1><i class="bi bi-target"></i> @Model.Name</h1>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back
+                    </a>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-secondary">@Model.GoalType</span>
+                            @if (Model.IsCompleted)
+                            {
+                                <span class="badge bg-success">Completed</span>
+                            }
+                            else if (Model.IsActive)
+                            {
+                                <span class="badge bg-primary">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Paused</span>
+                            }
+                        </div>
+                        <small class="text-muted">Created @Model.CreatedAt.ToString("MMM dd, yyyy")</small>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <p>@Model.Description</p>
+                    }
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Progress</span>
+                            <span>@progressPercentage.ToString("F1")%</span>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            <div class="progress-bar @(Model.IsCompleted ? "bg-success" : "bg-primary")"
+                                 style="width: @Math.Min(progressPercentage, 100)%"></div>
+                        </div>
+                    </div>
+
+                    <div class="row text-center g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded">
+                                <div class="text-success fw-bold fs-4">@CurrencyDisplay.Format(Model.CurrentAmount, cc)</div>
+                                <small class="text-muted">Current</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded">
+                                <div class="text-primary fw-bold fs-4">@CurrencyDisplay.Format(Model.TargetAmount, cc)</div>
+                                <small class="text-muted">Target</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 bg-light rounded">
+                                <div class="text-info fw-bold fs-4">@CurrencyDisplay.Format(Model.RemainingAmount, cc)</div>
+                                <small class="text-muted">Remaining</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Target Date:</strong>
+                            @(Model.TargetDate?.ToString("MMM dd, yyyy") ?? "Not set")
+                        </div>
+                        <div class="col-md-6">
+                            @if (Model.IsCompleted && Model.CompletedAt.HasValue)
+                            {
+                                <strong>Completed:</strong> @Model.CompletedAt.Value.ToString("MMM dd, yyyy")
+                            }
+                            else
+                            {
+                                <strong>Days remaining:</strong> @Model.DaysRemaining
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!Model.IsCompleted)
+            {
+                <div class="card">
+                    <div class="card-header">Add Progress</div>
+                    <div class="card-body">
+                        <form asp-action="UpdateProgress" method="post" class="row g-3 align-items-end">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <div class="col-md-8">
+                                <label class="form-label" for="amount">Amount to add</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@curSym</span>
+                                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0.01" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-circle"></i> Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-header">Household comments</div>
+  <div class="card-body">
+    <form method="post" asp-controller="Comments" asp-action="Add">
+      @Html.AntiForgeryToken()
+      <input type="hidden" name="entityType" value="Goal" />
+      <input type="hidden" name="entityId" value="@Model.Id" />
+      <input type="hidden" name="returnUrl" value="@Url.Action("Details", new { id = Model.Id })" />
+      <textarea name="body" class="form-control mb-2" rows="2" required placeholder="Leave a note for your household…"></textarea>
+      <button class="btn btn-sm btn-primary">Add comment</button>
+    </form>
+  </div>
+</div>

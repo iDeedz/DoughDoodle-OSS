@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Cash Flow";
+    var cc = CurrencyDisplay.Normalize(ViewData["PreferredCurrency"] as string);
+    var curSym = CurrencyDisplay.Symbol(cc);
+    var months = (int)(ViewBag.Months ?? 6);
+}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1><i class="bi bi-cash-stack"></i> Cash flow</h1>
+            <p class="text-muted mb-0">Income vs expenses — envelope truth over time.</p>
+        </div>
+        <div class="btn-group">
+            <a class="btn btn-outline-secondary @(months==6?"active":"")" href="?months=6">6 mo</a>
+            <a class="btn btn-outline-secondary @(months==12?"active":"")" href="?months=12">12 mo</a>
+        </div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Income</div><div class="h3 text-success">@CurrencyDisplay.Format((decimal)ViewBag.TotalIncome, cc, compact: true)</div></div></div></div>
+        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Expenses</div><div class="h3 text-danger">@CurrencyDisplay.Format((decimal)ViewBag.TotalExpenses, cc, compact: true)</div></div></div></div>
+        <div class="col-md-4"><div class="card shadow-sm"><div class="card-body"><div class="text-muted small">Net</div><div class="h3">@CurrencyDisplay.Format((decimal)ViewBag.Net, cc, compact: true)</div></div></div></div>
+    </div>
+    <div class="card shadow-sm"><div class="card-body"><canvas id="cfChart" height="120"></canvas></div></div>
+</div>
+<script>
+const data = @Html.Raw(ViewBag.CashFlowJson);
+const ctx = document.getElementById('cfChart');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: data.map(d => d.Label),
+    datasets: [
+      { label: 'Income', data: data.map(d => d.Income), backgroundColor: '#0D9488' },
+      { label: 'Expenses', data: data.map(d => d.Expenses), backgroundColor: '#F43F5E' },
+      { label: 'Net', data: data.map(d => d.Net), type: 'line', borderColor: '#0B1220', backgroundColor: 'transparent' }
+    ]
+  },
+  options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: value => curSym + value.toLocaleString() } } }, plugins: { tooltip: { callbacks: { label: context => context.dataset.label + ': ' + curSym + context.raw.toLocaleString() } } } }
+});
+</script>

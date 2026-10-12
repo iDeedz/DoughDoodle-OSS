@@ -1,0 +1,626 @@
+@{
+    ViewData["Title"] = "Features Guide";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            <div class="card position-sticky" style="top: 20px;">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-list"></i> Features</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <a href="#core" class="list-group-item list-group-item-action">🏠 Core Budgeting</a>
+                        <a href="#ai" class="list-group-item list-group-item-action">🤖 AI Features</a>
+                        <a href="#goals" class="list-group-item list-group-item-action">🎯 Goals & Tracking</a>
+                        <a href="#automation" class="list-group-item list-group-item-action">⚡ Automation</a>
+                        <a href="#reports" class="list-group-item list-group-item-action">📊 Reports & Analytics</a>
+                        <a href="#tools" class="list-group-item list-group-item-action">🛠️ Tools & Utilities</a>
+                        <a href="#admin" class="list-group-item list-group-item-action">⚙️ Management</a>
+                        <a href="#mobile" class="list-group-item list-group-item-action">📱 Mobile Features</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1><i class="bi bi-tools text-primary"></i> Complete Features Guide</h1>
+                    <p class="lead text-muted">Discover all the powerful features in DoughDoodle</p>
+                </div>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Help Center
+                </a>
+            </div>
+
+            <!-- Core Budgeting Features -->
+            <section id="core" class="mb-5">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0"><i class="bi bi-house-fill"></i> Core Budgeting Features</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>📊 Monthly Budget Dashboard</h5>
+                                <ul>
+                                    <li><strong>Real-time balance tracking</strong> - See remaining amounts instantly</li>
+                                    <li><strong>Visual progress bars</strong> - Quick visual status of each category</li>
+                                    <li><strong>Color-coded alerts</strong> - Green (good), yellow (warning), red (overspent)</li>
+                                    <li><strong>Available to budget</strong> - Always know how much unallocated money you have</li>
+                                </ul>
+
+                                <h5>💰 Income Management</h5>
+                                <ul>
+                                    <li><strong>Multiple income sources</strong> - Track salary, freelance, investments</li>
+                                    <li><strong>Monthly vs. variable income</strong> - Handle irregular pay schedules</li>
+                                    <li><strong>Historical income tracking</strong> - See income trends over time</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>🏷️ Category (Envelope) Management</h5>
+                                <ul>
+                                    <li><strong>Unlimited categories</strong> - Create as many envelopes as you need</li>
+                                    <li><strong>Default templates</strong> - Pre-made categories for common expenses</li>
+                                    <li><strong>Custom categories</strong> - Personalize for your unique situation</li>
+                                    <li><strong>Category groups</strong> - Organize related expenses together</li>
+                                </ul>
+
+                                <h5>💸 Transaction Management</h5>
+                                <ul>
+                                    <li><strong>Quick entry</strong> - Add transactions in seconds</li>
+                                    <li><strong>Detailed descriptions</strong> - Remember what you spent money on</li>
+                                    <li><strong>Date flexibility</strong> - Backdate or future-date transactions</li>
+                                    <li><strong>Transaction search</strong> - Find any transaction quickly</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-lightbulb"></i> <strong>Quick Tip:</strong> Use the tab filters (All, Underfunded, Overfunded) on your dashboard to focus on categories that need attention.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Features -->
+            <section id="ai" class="mb-5">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h2 class="mb-0"><i class="bi bi-robot"></i> AI-Powered Features</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>🧠 AI Budget Advisor</h5>
+                                <ul>
+                                    <li><strong>Personalized recommendations</strong> - Get budget suggestions based on your data</li>
+                                    <li><strong>Spending pattern analysis</strong> - Identify areas for improvement</li>
+                                    <li><strong>Budget optimization</strong> - Suggestions for better allocation</li>
+                                    <li><strong>Goal achievement paths</strong> - AI-driven plans to reach your goals</li>
+                                </ul>
+
+                                <h5>💳 AI Debt Manager</h5>
+                                <ul>
+                                    <li><strong>Debt payoff strategies</strong> - Avalanche vs. snowball recommendations</li>
+                                    <li><strong>Payment optimization</strong> - Best allocation of extra payments</li>
+                                    <li><strong>Payoff timeline predictions</strong> - See when you'll be debt-free</li>
+                                    <li><strong>Interest savings calculations</strong> - Know how much you'll save</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>🐷 AI Savings Planner</h5>
+                                <ul>
+                                    <li><strong>Automatic savings goals</strong> - AI suggests realistic savings targets</li>
+                                    <li><strong>Emergency fund calculator</strong> - Right-sized emergency fund for you</li>
+                                    <li><strong>Investment readiness</strong> - Know when you're ready to invest</li>
+                                    <li><strong>Retirement planning</strong> - Long-term savings strategies</li>
+                                </ul>
+
+                                <h5>🚀 Smart Insights & Patterns (NEW)</h5>
+                                <ul>
+                                    <li><strong>Spending pattern analysis</strong> - Identifies regular vs impulse spending</li>
+                                    <li><strong>Anomaly detection</strong> - Spots unusual transactions and deviations</li>
+                                    <li><strong>Financial health scoring</strong> - Comprehensive spending health analysis</li>
+                                    <li><strong>Optimization suggestions</strong> - Actionable recommendations for improvement</li>
+                                </ul>
+
+                                <h5>🔮 Budget Forecasting (NEW)</h5>
+                                <ul>
+                                    <li><strong>Predictive spending</strong> - 3, 6, and 12-month forecasts</li>
+                                    <li><strong>Seasonal adjustments</strong> - Holiday and seasonal spending patterns</li>
+                                    <li><strong>Trend analysis</strong> - Historical data with future projections</li>
+                                    <li><strong>Budget variance warnings</strong> - Predict potential overruns</li>
+                                </ul>
+                                
+                                <h5>💰 Investment Tracking (NEW)</h5>
+                                <ul>
+                                    <li><strong>Portfolio tracking</strong> - Monitor stocks, bonds, ETFs, and more</li>
+                                    <li><strong>Gain/loss analysis</strong> - Real-time performance tracking</li>
+                                    <li><strong>Multiple account types</strong> - Retirement, brokerage, cryptocurrency</li>
+                                    <li><strong>Holdings management</strong> - Track individual securities</li>
+                                </ul>
+                                
+                                <h5>📊 Tax Optimization (NEW)</h5>
+                                <ul>
+                                    <li><strong>AI tax suggestions</strong> - Personalized tax-saving strategies</li>
+                                    <li><strong>Deduction tracking</strong> - Identify potential deductions</li>
+                                    <li><strong>Retirement optimization</strong> - Maximize tax-advantaged contributions</li>
+                                    <li><strong>Tax bracket analysis</strong> - Understand your tax situation</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h5>🏷️ Smart Transaction Categorization (NEW)</h5>
+                                <ul>
+                                    <li><strong>Auto-categorization</strong> - AI suggests categories with 85%+ confidence</li>
+                                    <li><strong>Merchant recognition</strong> - Learns from transaction patterns</li>
+                                    <li><strong>Learning system</strong> - Improves accuracy from user corrections</li>
+                                    <li><strong>Rule-based fallbacks</strong> - Works even without API connectivity</li>
+                                </ul>
+                                
+                                <h5>🔄 Automated Transfers (NEW)</h5>
+                                <ul>
+                                    <li><strong>Scheduled transfers</strong> - Automate savings and budget allocations</li>
+                                    <li><strong>Flexible frequency</strong> - Daily, weekly, monthly, or custom schedules</li>
+                                    <li><strong>Smart execution</strong> - Auto-execute or manual approval</li>
+                                    <li><strong>Transfer limits</strong> - Set maximum transfers or end dates</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>💪 Personalized Financial Coach (NEW)</h5>
+                                <ul>
+                                    <li><strong>Dynamic personalities</strong> - Encouraging, Analytical, Motivational, Practical</li>
+                                    <li><strong>Context-aware messaging</strong> - Advice based on your spending patterns</li>
+                                    <li><strong>Quick action items</strong> - Time-boxed tasks (5-15 minutes)</li>
+                                    <li><strong>Motivational quotes</strong> - Daily inspiration and milestone celebrations</li>
+                                </ul>
+                                
+                                <h5>👥 Collaborative Budgeting (NEW)</h5>
+                                <ul>
+                                    <li><strong>Shared goals</strong> - Collaborate on financial goals with family</li>
+                                    <li><strong>Multi-user access</strong> - Up to 20 sub-accounts on Premium plan</li>
+                                    <li><strong>Individual privacy</strong> - Each user maintains separate budgets</li>
+                                    <li><strong>Household overview</strong> - Main account can view all budgets</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <i class="bi bi-rocket"></i> <strong>New Advanced AI Features:</strong> Access Smart Insights, Budget Forecasting, Personal Coach, Transaction Categorization, Tax Optimization, Investment Tracking, and Automated Transfers directly from your dashboard's "🚀 Advanced AI Features" section.
+                        </div>
+
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-check-circle"></i> <strong>Smart Fallbacks:</strong> All AI features work even without an API connection, providing intelligent default recommendations.
+                        </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mt-3">
+                            <div class="card-body">
+                                <h6><i class="bi bi-gear"></i> How to Access AI Features:</h6>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>🚀 Advanced AI Features (NEW):</strong>
+                                        <ol class="mb-3">
+                                            <li>From your dashboard, find the "🚀 Advanced AI Features" section</li>
+                                            <li>Click <strong>"Smart Insights & Patterns"</strong> for spending analysis</li>
+                                            <li>Click <strong>"Budget Forecasting"</strong> for future predictions</li>
+                                            <li>Click <strong>"Personal Financial Coach"</strong> for personalized guidance</li>
+                                            <li>Click <strong>"Smart Categorization"</strong> for transaction suggestions</li>
+                                            <li>Click <strong>"Tax Optimization"</strong> for tax-saving strategies</li>
+                                        </ol>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Core AI Tools:</strong>
+                                        <ol class="mb-0">
+                                            <li>Go to <strong>Tools → AI Debt Manager</strong> or <strong>AI Savings Planner</strong></li>
+                                            <li>Enter your financial information</li>
+                                            <li>Click "Get AI Recommendations"</li>
+                                            <li>Review and implement the suggestions</li>
+                                        </ol>
+                                        
+                                        <strong class="mt-3 d-block">Investment & Transfer Tools:</strong>
+                                        <ol class="mb-0">
+                                            <li>Access <strong>Investments</strong> from main navigation</li>
+                                            <li>Set up <strong>Automated Transfers</strong> from Tools menu</li>
+                                            <li>Track portfolio performance and automate savings</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Goals & Tracking -->
+            <section id="goals" class="mb-5">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h2 class="mb-0"><i class="bi bi-target"></i> Goals & Tracking</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>🎯 Financial Goals</h5>
+                                <ul>
+                                    <li><strong>Multiple goal types</strong>:
+                                        <ul>
+                                            <li>💰 General Savings</li>
+                                            <li>🚨 Emergency Fund</li>
+                                            <li>💳 Debt Payoff</li>
+                                            <li>🏖️ Vacation Fund</li>
+                                            <li>🏠 Home Purchase</li>
+                                            <li>🎓 Education Fund</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Progress tracking</strong> - Visual progress bars and percentages</li>
+                                    <li><strong>Target dates</strong> - Set deadlines and track timeline</li>
+                                    <li><strong>Achievement celebrations</strong> - Get congratulated when you reach goals</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>📈 Progress Analytics</h5>
+                                <ul>
+                                    <li><strong>Goal velocity tracking</strong> - How fast you're progressing</li>
+                                    <li><strong>Completion predictions</strong> - Estimated achievement dates</li>
+                                    <li><strong>Contribution history</strong> - Track all payments toward goals</li>
+                                    <li><strong>Goal comparison</strong> - See which goals are on track</li>
+                                </ul>
+
+                                <div class="alert alert-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> <strong>Pro Tip:</strong> Connect goals to specific budget categories to automatically track contributions.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card bg-light mt-3">
+                            <div class="card-body">
+                                <h6><i class="bi bi-plus-circle"></i> How to Create a Goal:</h6>
+                                <ol class="mb-0">
+                                    <li>Go to <strong>Goals</strong> in the main navigation</li>
+                                    <li>Click "Add New Goal"</li>
+                                    <li>Choose goal type and enter details</li>
+                                    <li>Set target amount and deadline</li>
+                                    <li>Start making contributions!</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Automation Features -->
+            <section id="automation" class="mb-5">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h2 class="mb-0"><i class="bi bi-lightning-fill"></i> Automation Features</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>🔄 Recurring Transactions</h5>
+                                <ul>
+                                    <li><strong>Set it and forget it</strong> - Automatically add regular bills</li>
+                                    <li><strong>Flexible schedules</strong>:
+                                        <ul>
+                                            <li>Daily, Weekly, Bi-weekly</li>
+                                            <li>Monthly, Quarterly, Yearly</li>
+                                            <li>Custom intervals</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Smart reminders</strong> - Get notified before due dates</li>
+                                    <li><strong>Easy management</strong> - Pause, modify, or delete anytime</li>
+                                </ul>
+
+                                <h5>📊 Automatic Rollover</h5>
+                                <ul>
+                                    <li><strong>Unspent funds</strong> - Automatically carry over to next month</li>
+                                    <li><strong>Overspent handling</strong> - Automatically deduct from next month</li>
+                                    <li><strong>Configurable rules</strong> - Set rollover preferences per category</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>🔔 Smart Notifications</h5>
+                                <ul>
+                                    <li><strong>Budget alerts</strong>:
+                                        <ul>
+                                            <li>80% spent warnings</li>
+                                            <li>Overspending alerts</li>
+                                            <li>Low balance notifications</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Goal reminders</strong> - Stay motivated with progress updates</li>
+                                    <li><strong>Bill reminders</strong> - Never miss a payment</li>
+                                    <li><strong>Monthly summaries</strong> - Automated financial reports</li>
+                                </ul>
+
+                                <h5>⚡ Quick Actions</h5>
+                                <ul>
+                                    <li><strong>One-click transfers</strong> - Move money between envelopes</li>
+                                    <li><strong>Batch operations</strong> - Update multiple categories at once</li>
+                                    <li><strong>Template transactions</strong> - Save common purchases</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports & Analytics -->
+            <section id="reports" class="mb-5">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <h2 class="mb-0"><i class="bi bi-graph-up"></i> Reports & Analytics</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>📈 Visual Analytics Dashboard</h5>
+                                <ul>
+                                    <li><strong>Interactive charts</strong> - Click and explore your data</li>
+                                    <li><strong>Spending trends</strong> - See patterns over time</li>
+                                    <li><strong>Category breakdowns</strong> - Pie charts of your spending</li>
+                                    <li><strong>Monthly comparisons</strong> - Track improvement month-to-month</li>
+                                </ul>
+
+                                <h5>📊 Comprehensive Reports</h5>
+                                <ul>
+                                    <li><strong>Monthly summaries</strong> - Complete financial overview</li>
+                                    <li><strong>Category reports</strong> - Detailed spending by envelope</li>
+                                    <li><strong>Income vs. expenses</strong> - Profit/loss tracking</li>
+                                    <li><strong>Goal progress reports</strong> - Track towards financial milestones</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>📅 Time-based Analysis</h5>
+                                <ul>
+                                    <li><strong>Year-over-year comparisons</strong> - Long-term trends</li>
+                                    <li><strong>Seasonal patterns</strong> - Identify recurring spending cycles</li>
+                                    <li><strong>Custom date ranges</strong> - Focus on specific periods</li>
+                                    <li><strong>Forecasting</strong> - Project future spending based on trends</li>
+                                </ul>
+
+                                <h5>💡 Smart Insights</h5>
+                                <ul>
+                                    <li><strong>Spending insights</strong> - Unusual activity detection</li>
+                                    <li><strong>Budget variance analysis</strong> - Where you're off track</li>
+                                    <li><strong>Optimization suggestions</strong> - Data-driven recommendations</li>
+                                    <li><strong>Success metrics</strong> - Track your financial health score</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tools & Utilities -->
+            <section id="tools" class="mb-5">
+                <div class="card border-secondary">
+                    <div class="card-header bg-secondary text-white">
+                        <h2 class="mb-0"><i class="bi bi-tools"></i> Tools & Utilities</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>📁 Import/Export Tools</h5>
+                                <ul>
+                                    <li><strong>CSV import</strong> - Bulk upload transactions from bank</li>
+                                    <li><strong>Multiple formats</strong> - Support for common bank export formats</li>
+                                    <li><strong>Data validation</strong> - Automatic error checking on import</li>
+                                    <li><strong>Export options</strong> - Download your data in various formats</li>
+                                </ul>
+
+                                <h5>🔍 Advanced Search</h5>
+                                <ul>
+                                    <li><strong>Global search</strong> - Search across all transactions</li>
+                                    <li><strong>Filter combinations</strong> - Multiple criteria searching</li>
+                                    <li><strong>Date range filters</strong> - Find transactions by time period</li>
+                                    <li><strong>Amount ranges</strong> - Search by spending amount</li>
+                                    <li><strong>Category filters</strong> - Focus on specific envelopes</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>⚙️ Customization Options</h5>
+                                <ul>
+                                    <li><strong>Theme customization</strong> - Personalize the interface</li>
+                                    <li><strong>Notification preferences</strong> - Control what alerts you receive</li>
+                                    <li><strong>Currency settings</strong> - Support for multiple currencies</li>
+                                    <li><strong>Date format options</strong> - Choose your preferred date style</li>
+                                </ul>
+
+                                <h5>🛠️ Power User Features</h5>
+                                <ul>
+                                    <li><strong>Keyboard shortcuts</strong> - Speed up common tasks</li>
+                                    <li><strong>Bulk operations</strong> - Edit multiple items at once</li>
+                                    <li><strong>API access</strong> - Connect with external tools (coming soon)</li>
+                                    <li><strong>Custom categories</strong> - Create unlimited envelope types</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin & Management -->
+            <section id="admin" class="mb-5">
+                <div class="card border-dark">
+                    <div class="card-header bg-dark text-white">
+                        <h2 class="mb-0"><i class="bi bi-gear-fill"></i> Account & User Management</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>👥 Multi-User Features</h5>
+                                <ul>
+                                    <li><strong>Family accounts</strong> - Main account + up to 5 sub-accounts</li>
+                                    <li><strong>Individual privacy</strong> - Each user has separate data</li>
+                                    <li><strong>Overview access</strong> - Main account can view all budgets (read-only)</li>
+                                    <li><strong>User management</strong> - Add, remove, and manage sub-accounts</li>
+                                </ul>
+
+                                <h5>🔐 Security Features</h5>
+                                <ul>
+                                    <li><strong>Secure authentication</strong> - Professional login system</li>
+                                    <li><strong>Data encryption</strong> - Your financial data is protected</li>
+                                    <li><strong>Session management</strong> - Automatic logout for security</li>
+                                    <li><strong>Access controls</strong> - Role-based permissions</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>⚙️ Account Settings</h5>
+                                <ul>
+                                    <li><strong>Profile management</strong> - Update personal information</li>
+                                    <li><strong>Password changes</strong> - Secure password updates</li>
+                                    <li><strong>Notification preferences</strong> - Control email and app alerts</li>
+                                    <li><strong>Data export</strong> - Download all your financial data</li>
+                                </ul>
+
+                                <h5>📱 Subscription Management</h5>
+                                <ul>
+                                    <li><strong>30-day free trial</strong> - Full access to get started</li>
+                                    <li><strong>Flexible plans</strong> - Pocket (free), Bankroll, Stack, Vault, Prime</li>
+                                    <li><strong>Usage tracking</strong> - Monitor your account limits</li>
+                                    <li><strong>Upgrade options</strong> - Seamless plan changes</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Mobile Features -->
+            <section id="mobile" class="mb-5">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h2 class="mb-0"><i class="bi bi-phone"></i> Mobile-Friendly Features</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>📱 Responsive Design</h5>
+                                <ul>
+                                    <li><strong>Mobile-optimized interface</strong> - Perfect on any device</li>
+                                    <li><strong>Touch-friendly controls</strong> - Easy tapping and swiping</li>
+                                    <li><strong>Thumb-friendly navigation</strong> - Designed for one-handed use</li>
+                                    <li><strong>Fast loading</strong> - Optimized for mobile networks</li>
+                                </ul>
+
+                                <h5>⚡ Quick Mobile Actions</h5>
+                                <ul>
+                                    <li><strong>Instant transaction entry</strong> - Add expenses on the go</li>
+                                    <li><strong>Quick balance checks</strong> - See envelope status instantly</li>
+                                    <li><strong>Mobile search</strong> - Find transactions quickly</li>
+                                    <li><strong>One-tap transfers</strong> - Move money between envelopes</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>🔔 Mobile Notifications</h5>
+                                <ul>
+                                    <li><strong>Push notifications</strong> - Real-time budget alerts</li>
+                                    <li><strong>Spending reminders</strong> - Stay within budget limits</li>
+                                    <li><strong>Goal progress updates</strong> - Celebrate milestones</li>
+                                    <li><strong>Bill reminders</strong> - Never miss payments</li>
+                                </ul>
+
+                                <div class="alert alert-info">
+                                    <i class="bi bi-lightbulb"></i> <strong>Mobile Tip:</strong> Add DoughDoodle to your phone's home screen for app-like access. Use your browser's "Add to Home Screen" feature.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feature Request -->
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h4><i class="bi bi-lightbulb text-warning"></i> Missing a Feature?</h4>
+                    <p class="lead">We're constantly improving DoughDoodle based on user feedback.</p>
+                    <a href="@Url.Action("ContactSupport")" class="btn btn-primary">
+                        <i class="bi bi-chat-dots"></i> Request a Feature
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0;
+}
+
+section {
+    scroll-margin-top: 100px;
+}
+
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+
+ul {
+    margin-bottom: 1rem;
+}
+
+ul ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+</style>
+
+<script>
+// Smooth scrolling for sidebar navigation
+document.querySelectorAll('.list-group-item-action[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+            
+            // Update active state
+            document.querySelectorAll('.list-group-item-action').forEach(item => {
+                item.classList.remove('active');
+            });
+            this.classList.add('active');
+        }
+    });
+});
+
+// Highlight current section in sidebar as user scrolls
+window.addEventListener('scroll', function() {
+    const sections = document.querySelectorAll('section[id]');
+    const navItems = document.querySelectorAll('.list-group-item-action[href^="#"]');
+    
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop - 120;
+        if (window.pageYOffset >= sectionTop) {
+            current = section.getAttribute('id');
+        }
+    });
+    
+    navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + current) {
+            item.classList.add('active');
+        }
+    });
+});
+</script>

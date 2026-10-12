@@ -1,0 +1,351 @@
+@model DoughDoodle.Models.ViewModels.UserReportViewModel
+@{
+    ViewData["Title"] = "Personal Report";
+    var cc = CurrencyDisplay.Normalize(ViewData["PreferredCurrency"] as string);
+    var curSym = CurrencyDisplay.Symbol(cc);
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-person-badge text-primary"></i> Personal Report</h1>
+            <p class="lead text-muted">Your complete financial profile and statistics</p>
+        </div>
+        <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Back to Overview
+        </a>
+    </div>
+
+    <!-- User Profile Card -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-circle"></i> Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                            @Model.User.FirstName.Substring(0, 1)@Model.User.LastName.Substring(0, 1)
+                        </div>
+                        <h5 class="mt-2 mb-0">@Model.User.FullName</h5>
+                        <small class="text-muted">@Model.User.Email</small>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <strong>Account Type</strong>
+                            <br>
+                            <span class="badge @(Model.User.UserType == UserType.MainAccount ? "bg-success" : "bg-info")">
+                                @Model.User.UserType
+                            </span>
+                        </div>
+                        <div class="col-6">
+                            <strong>Status</strong>
+                            <br>
+                            <span class="badge @(Model.User.IsActive ? "bg-success" : "bg-danger")">
+                                @(Model.User.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <strong>Member Since</strong>
+                        <br>@Model.User.CreatedAt.ToString("MMMM dd, yyyy")
+                        <br><small class="text-muted">(@Model.AccountAgeText old)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <!-- Financial Overview -->
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="card border-success">
+                        <div class="card-body text-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">Total Spent</h6>
+                                    <h4 class="card-title text-success">@CurrencyDisplay.Format(Model.TotalSpent, cc)</h4>
+                                </div>
+                                <i class="bi bi-credit-card text-success" style="font-size: 2rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card border-info">
+                        <div class="card-body text-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">Total Transactions</h6>
+                                    <h4 class="card-title text-info">@Model.TotalTransactions.ToString("N0")</h4>
+                                </div>
+                                <i class="bi bi-receipt text-info" style="font-size: 2rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card border-warning">
+                        <div class="card-body text-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">Avg Monthly Spending</h6>
+                                    <h4 class="card-title text-warning">@CurrencyDisplay.Format(Model.AverageMonthlySpending, cc)</h4>
+                                </div>
+                                <i class="bi bi-graph-up text-warning" style="font-size: 2rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card border-danger">
+                        <div class="card-body text-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2 text-muted">Highest Monthly</h6>
+                                    <h4 class="card-title text-danger">@CurrencyDisplay.Format(Model.HighestMonthlySpending, cc)</h4>
+                                </div>
+                                <i class="bi bi-arrow-up-circle text-danger" style="font-size: 2rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Management Stats -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Active Categories</h6>
+                    <h4 class="card-title text-primary">@Model.TotalCategories</h4>
+                    <small class="text-muted">Budget categories</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Active Goals</h6>
+                    <h4 class="card-title text-success">@Model.ActiveGoals</h4>
+                    <small class="text-muted">In progress</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Completed Goals</h6>
+                    <h4 class="card-title text-warning">@Model.CompletedGoals</h4>
+                    <small class="text-muted">Achievements</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Spending Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Your Monthly Spending Pattern</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlySpendingChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Health Score -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-heart-pulse"></i> Financial Health Score</h5>
+                </div>
+                <div class="card-body text-center">
+                    @{
+                        var healthScore = Model.TotalTransactions > 0 && Model.TotalCategories > 0 ? 
+                            Math.Min(100, (Model.TotalCategories * 10) + (Model.CompletedGoals * 15) + (Model.TotalTransactions > 50 ? 30 : Model.TotalTransactions / 2)) : 0;
+                    }
+                    <div class="mb-3">
+                        <div class="display-4 text-success">@healthScore</div>
+                        <h6 class="text-muted">out of 100</h6>
+                    </div>
+                    <div class="progress mb-3" style="height: 12px;">
+                        <div class="progress-bar bg-success" style="width: @healthScore%;"></div>
+                    </div>
+                    <h6 class="@(healthScore >= 80 ? "text-success" : healthScore >= 60 ? "text-warning" : "text-danger")">
+                        @(healthScore >= 80 ? "Excellent!" : healthScore >= 60 ? "Good" : healthScore >= 40 ? "Fair" : "Needs Improvement")
+                    </h6>
+                    <small class="text-muted">
+                        Based on budgeting activity, goal completion, and transaction history
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        @if (Model.TotalCategories < 5)
+                        {
+                            <li class="mb-2">
+                                <i class="bi bi-plus-circle text-primary me-2"></i>
+                                <strong>Add more categories</strong> - Break down your spending into more specific categories for better tracking
+                            </li>
+                        }
+                        @if (Model.ActiveGoals == 0)
+                        {
+                            <li class="mb-2">
+                                <i class="bi bi-target text-success me-2"></i>
+                                <strong>Set financial goals</strong> - Create savings goals to stay motivated and track progress
+                            </li>
+                        }
+                        @if (Model.TotalTransactions < 20)
+                        {
+                            <li class="mb-2">
+                                <i class="bi bi-receipt text-info me-2"></i>
+                                <strong>Track more transactions</strong> - Record more expenses to get better insights
+                            </li>
+                        }
+                        @if (Model.AccountAge.Days < 30)
+                        {
+                            <li class="mb-2">
+                                <i class="bi bi-calendar-check text-warning me-2"></i>
+                                <strong>Build your habit</strong> - Keep using DoughDoodle daily for the best results
+                            </li>
+                        }
+                    </ul>
+                    @if (Model.TotalCategories >= 5 && Model.ActiveGoals > 0 && Model.TotalTransactions >= 20)
+                    {
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            <strong>Great job!</strong> You're using DoughDoodle effectively. Keep up the excellent budgeting habits!
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <div class="d-grid">
+                                <a href="/Home/AddTransaction" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle"></i> Add Transaction
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-grid">
+                                <a href="/Goals" class="btn btn-success">
+                                    <i class="bi bi-target"></i> View Goals
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-grid">
+                                <a href="/Home/AddCategory" class="btn btn-info">
+                                    <i class="bi bi-folder-plus"></i> Add Category
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="d-grid">
+                                <a href="/Settings" class="btn btn-outline-secondary">
+                                    <i class="bi bi-gear"></i> Settings
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.display-4 {
+    font-weight: 700;
+}
+
+.progress {
+    border-radius: 6px;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const monthlyData = @Html.Raw(ViewBag.MonthlySpendingJson ?? "[]");
+
+    // Monthly spending chart
+    new Chart(document.getElementById('monthlySpendingChart'), {
+        type: 'line',
+        data: {
+            labels: monthlyData.map(d => {
+                const date = new Date(d.Month + '-01');
+                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            }),
+            datasets: [{
+                label: 'Monthly Spending',
+                data: monthlyData.map(d => d.Amount),
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return curSym + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Spent: ' + curSym + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

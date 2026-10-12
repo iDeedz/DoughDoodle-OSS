@@ -1,0 +1,24 @@
+@{
+  ViewData["Title"] = "Net worth projections";
+  var points = (IEnumerable<dynamic>)ViewBag.Points;
+}
+<h2><i class="bi bi-pie-chart"></i> Net worth projections</h2>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card card-body">Assets<br/><strong>@CurrencyDisplay.Format((decimal)ViewBag.Assets, ViewData["PreferredCurrency"] as string)</strong></div></div>
+  <div class="col-md-4"><div class="card card-body">Liabilities<br/><strong>@CurrencyDisplay.Format((decimal)ViewBag.Liabilities, ViewData["PreferredCurrency"] as string)</strong></div></div>
+  <div class="col-md-4"><div class="card card-body">Net<br/><strong>@CurrencyDisplay.Format((decimal)ViewBag.CurrentNet, ViewData["PreferredCurrency"] as string)</strong></div></div>
+</div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto"><label class="form-label">Months</label><input type="number" name="months" value="12" class="form-control" /></div>
+  <div class="col-auto"><label class="form-label">Monthly savings</label><input type="number" step="0.01" name="monthlySavings" value="@ViewBag.MonthlySavings" class="form-control" /></div>
+  <div class="col-auto align-self-end"><button class="btn btn-primary">Project</button></div>
+</form>
+<canvas id="nwChart" height="110"></canvas>
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = [@Html.Raw(string.Join(",", points.Select(p => $"\"{p.Month}\"")))];
+const data = [@Html.Raw(string.Join(",", points.Select(p => $"{p.Projected}")))];
+new Chart(document.getElementById('nwChart'), { type:'line', data:{ labels, datasets:[{ label:'Projected net worth', data, borderColor:'#0D9488', tension:.2 }] }});
+</script>
+}

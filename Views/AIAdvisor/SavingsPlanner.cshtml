@@ -1,0 +1,207 @@
+@{
+    ViewData["Title"] = "AI Savings Optimizer";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <h2><i class="bi bi-piggy-bank"></i> AI Savings Optimizer</h2>
+            <p class="text-muted">Discover smart ways to save money and optimize your budget with AI-powered insights.</p>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>💰 Monthly Income</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>What is your total monthly income after taxes?</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                            <input type="number" id="monthlyIncome" class="form-control" placeholder="0.00" step="0.01">
+                        </div>
+                        <small class="form-text text-muted">Include all sources of income (salary, side jobs, investments, etc.)</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>🎯 Savings Goals</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label>Emergency Fund Goal</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                                    <input type="number" id="emergencyGoal" class="form-control" placeholder="10000" step="100">
+                                </div>
+                                <small class="text-muted">Recommended: 3-6 months of expenses</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label>Other Savings Goals</label>
+                                <input type="text" id="otherGoals" class="form-control" placeholder="e.g., Vacation, Car, House Down Payment">
+                                <small class="text-muted">Separate multiple goals with commas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary btn-lg" onclick="getSavingsOptimization()">
+                    <i class="bi bi-robot"></i> Get AI Savings Plan
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>📊 Savings Tips</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>🏛️ 50/30/20 Rule</h6>
+                        <ul class="small list-unstyled">
+                            <li>50% - Needs (rent, utilities, groceries)</li>
+                            <li>30% - Wants (entertainment, dining out)</li>
+                            <li>20% - Savings & debt payments</li>
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <h6>🔥 Pay Yourself First</h6>
+                        <small class="text-muted">Automatically save a percentage of your income before any spending.</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6>📈 Emergency Fund Priority</h6>
+                        <small class="text-muted">Build 3-6 months of expenses for financial security.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>💡 Quick Wins</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Cancel unused subscriptions</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Buy generic brands</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Meal prep to avoid takeout</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Review insurance rates annually</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Use cashback credit cards responsibly</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- AI Recommendations will appear here -->
+            <div id="ai-savings-recommendations" style="display:none;" class="mt-4">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <strong>🤖 AI Savings Plan</strong>
+                    </div>
+                    <div class="card-body" id="savings-recommendations-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)));
+async function getSavingsOptimization() {
+    const monthlyIncome = parseFloat(document.getElementById('monthlyIncome').value);
+    const emergencyGoal = parseFloat(document.getElementById('emergencyGoal').value) || 0;
+    const otherGoals = document.getElementById('otherGoals').value;
+    
+    if (!monthlyIncome || monthlyIncome <= 0) {
+        alert('Please enter your monthly income to get personalized recommendations.');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/AIAdvisor/GetSavingsOptimization', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                totalIncome: monthlyIncome
+            })
+        });
+        
+        const recommendation = await response.json();
+        displaySavingsRecommendations(recommendation);
+    } catch (error) {
+        console.error('Error getting savings recommendations:', error);
+        alert('Unable to get savings recommendations at this time. Please check your API configuration.');
+    }
+}
+
+function displaySavingsRecommendations(recommendation) {
+    const container = document.getElementById('ai-savings-recommendations');
+    const content = document.getElementById('savings-recommendations-content');
+    
+    let html = `
+        <div class="mb-3">
+            <h6>🎯 Main Goal</h6>
+            <p class="small">${recommendation.mainGoal}</p>
+        </div>
+    `;
+    
+    if (recommendation.suggestedEmergencyFund > 0) {
+        html += `
+            <div class="mb-3">
+                <h6>🏛️ Recommended Emergency Fund</h6>
+                <p class="small">Target: ${currencySymbol}${recommendation.suggestedEmergencyFund.toFixed(2)}</p>
+            </div>
+        `;
+    }
+    
+    if (recommendation.costCuttingTips && recommendation.costCuttingTips.length > 0) {
+        html += `
+            <div class="mb-3">
+                <h6>✂️ Cost Cutting Tips</h6>
+                <ul class="small list-unstyled">
+        `;
+        
+        recommendation.costCuttingTips.forEach(tip => {
+            html += `<li><i class="bi bi-lightbulb text-warning"></i> ${tip}</li>`;
+        });
+        
+        html += '</ul></div>';
+    }
+    
+    if (recommendation.recommendedGoals && recommendation.recommendedGoals.length > 0) {
+        html += `
+            <div class="mb-3">
+                <h6>📈 Savings Goals</h6>
+                <div class="small">
+        `;
+        
+        recommendation.recommendedGoals.forEach(goal => {
+            const priorityClass = goal.priority.toLowerCase() === 'high' ? 'danger' : 
+                                 goal.priority.toLowerCase() === 'medium' ? 'warning' : 'info';
+            html += `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span><strong>${goal.name}</strong></span>
+                    <span class="badge bg-${priorityClass}">${goal.priority}</span>
+                </div>
+                <div class="mb-2">
+                    <small>Target: ${currencySymbol}${goal.amount.toFixed(2)} | Timeline: ${goal.timeFrame}</small>
+                </div>
+            `;
+        });
+        
+        html += '</div></div>';
+    }
+    
+    content.innerHTML = html;
+    container.style.display = 'block';
+}
+</script>

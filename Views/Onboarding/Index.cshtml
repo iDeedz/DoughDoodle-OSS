@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Welcome to DoughDoodle";
+    ViewData["FullBleed"] = true;
+    var firstName = ViewBag.FirstName as string ?? "there";
+}
+
+<div class="dd-onboard dd-fade-up">
+    <div class="text-center mb-4">
+        <img src="~/images/branding/logo-mark.svg" asp-append-version="true" alt="DoughDoodle" width="72" height="72" class="mb-3" style="filter: drop-shadow(0 8px 16px rgba(11,18,32,.2));" />
+        <div class="dd-onboard-steps" aria-hidden="true">
+            <span class="active"></span><span></span><span></span>
+        </div>
+        <h1 class="h2 fw-bold">Hi @firstName — let's get your dough in order</h1>
+        <p class="text-muted mb-0">Under a few minutes. No bank login required. CSV import is the honest path.</p>
+    </div>
+
+    <div class="card border-0 shadow-lg" style="border-radius: 1.25rem;">
+        <div class="card-body p-4 p-md-5">
+            <form method="post" asp-action="QuickStart">
+                @Html.AntiForgeryToken()
+                <div class="mb-4">
+                    <label class="form-label">Starter envelope set</label>
+                    <select name="starterSet" class="form-select form-select-lg">
+                        <option value="defaults">Starter envelopes (recommended)</option>
+                        <option value="minimal">I'll add my own later</option>
+                    </select>
+                    <div class="form-text">Starter envelopes plants a full set. “I’ll add my own later” leaves envelopes empty.</div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">This month's income <span class="text-muted fw-normal">(optional)</span></label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text"><i class="bi bi-cash-coin"></i></span>
+                        <input type="number" step="0.01" min="0" name="monthlyIncome" class="form-control" placeholder="e.g. 4500" />
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Display currency</label>
+                    <select name="currency" class="form-select">
+                        <option value="USD">USD</option>
+                        <option value="ZAR">ZAR</option>
+                        <option value="EUR">EUR</option>
+                        <option value="GBP">GBP</option>
+                        <option value="AUD">AUD</option>
+                    </select>
+                    <div class="form-text">Label only — live FX conversion is not claimed.</div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100 mb-2">
+                    <i class="bi bi-check2-circle"></i> Start budgeting
+                </button>
+            </form>
+            <form method="post" asp-action="Skip" class="text-center mt-2">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-link text-muted">Skip for now</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-4 text-center">
+        <div class="col-md-4">
+            <div class="dd-feature-card py-3">
+                <div class="dd-feature-icon" style="width:48px;height:48px;font-size:1.25rem;border-radius:12px;"><i class="bi bi-envelope-paper"></i></div>
+                <h3 class="h6 mb-1">Envelopes</h3>
+                <p class="small text-muted mb-0">Assign every dollar a job</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-feature-card py-3">
+                <div class="dd-feature-icon" style="width:48px;height:48px;font-size:1.25rem;border-radius:12px;"><i class="bi bi-radar"></i></div>
+                <h3 class="h6 mb-1">Hunt leaks</h3>
+                <p class="small text-muted mb-0">Spot subscription money drains</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-feature-card py-3">
+                <div class="dd-feature-icon" style="width:48px;height:48px;font-size:1.25rem;border-radius:12px;"><i class="bi bi-upload"></i></div>
+                <h3 class="h6 mb-1">Honest import</h3>
+                <p class="small text-muted mb-0">CSV today — no fake bank sync</p>
+            </div>
+        </div>
+    </div>
+</div>

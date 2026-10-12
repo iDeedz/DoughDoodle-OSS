@@ -1,0 +1,208 @@
+@model DoughDoodle.Models.Bill
+@{
+    ViewData["Title"] = "Add New Bill";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-plus-circle"></i> Add New Bill</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Name" class="form-label">Bill Name *</label>
+                                    <input asp-for="Name" class="form-control" placeholder="e.g., Electric Bill, Mortgage" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Amount" class="form-label">Amount *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                                        <input asp-for="Amount" class="form-control" placeholder="0.00" />
+                                    </div>
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="DueDate" class="form-label">Due Date *</label>
+                                    <input asp-for="DueDate" type="date" class="form-control" />
+                                    <span asp-validation-for="DueDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="CategoryId" class="form-label">Category</label>
+                                    <select asp-for="CategoryId" class="form-select">
+                                        <option value="">Select a category</option>
+                                        @foreach (var category in (ViewBag.Categories as List<DoughDoodle.Models.Category>) ?? new List<DoughDoodle.Models.Category>())
+                                        {
+                                            <option value="@category.Id">@category.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="IsRecurring" class="form-check-input" type="checkbox" id="isRecurringCheck" />
+                                        <label class="form-check-label" for="isRecurringCheck">
+                                            This is a recurring bill
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3" id="recurrenceGroup" style="display: none;">
+                                    <label asp-for="Recurrence" class="form-label">Recurrence</label>
+                                    <select asp-for="Recurrence" class="form-select">
+                                        <option value="Monthly">Monthly</option>
+                                        <option value="Weekly">Weekly</option>
+                                        <option value="BiWeekly">Bi-Weekly</option>
+                                        <option value="Quarterly">Quarterly</option>
+                                        <option value="SemiAnnually">Semi-Annually</option>
+                                        <option value="Annually">Annually</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Payee" class="form-label">Payee</label>
+                                    <input asp-for="Payee" class="form-control" placeholder="e.g., Pacific Gas & Electric" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="Website" class="form-label">Website</label>
+                                    <input asp-for="Website" type="url" class="form-control" placeholder="https://www.example.com" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="(555) 123-4567" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label asp-for="AccountNumber" class="form-label">Account Number</label>
+                                    <input asp-for="AccountNumber" class="form-control" placeholder="Last 4 digits recommended" />
+                                    <div class="form-text">For identification purposes (last 4 digits recommended)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input asp-for="AutoPay" class="form-check-input" type="checkbox" id="autoPayCheck" />
+                                        <label class="form-check-label" for="autoPayCheck">
+                                            Auto-Pay enabled
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3" id="autoPayGroup" style="display: none;">
+                                    <label asp-for="AutoPayAccount" class="form-label">Auto-Pay Account</label>
+                                    <input asp-for="AutoPayAccount" class="form-control" placeholder="e.g., Checking ***1234" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notification Settings</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input asp-for="NotificationsEnabled" class="form-check-input" type="checkbox" checked />
+                                        <label class="form-check-label" asp-for="NotificationsEnabled">
+                                            Enable notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Remind me</span>
+                                        <input asp-for="NotificationDaysBefore" type="number" class="form-control" min="1" max="30" value="3" />
+                                        <span class="input-group-text">days before</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="2" placeholder="Additional details about this bill"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">Notes</label>
+                            <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Personal notes or reminders"></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Bills
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Create Bill
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const isRecurringCheck = document.getElementById('isRecurringCheck');
+    const recurrenceGroup = document.getElementById('recurrenceGroup');
+    const autoPayCheck = document.getElementById('autoPayCheck');
+    const autoPayGroup = document.getElementById('autoPayGroup');
+    
+    // Handle recurring bill toggle
+    isRecurringCheck.addEventListener('change', function() {
+        if (this.checked) {
+            recurrenceGroup.style.display = 'block';
+        } else {
+            recurrenceGroup.style.display = 'none';
+        }
+    });
+    
+    // Handle auto-pay toggle
+    autoPayCheck.addEventListener('change', function() {
+        if (this.checked) {
+            autoPayGroup.style.display = 'block';
+        } else {
+            autoPayGroup.style.display = 'none';
+        }
+    });
+    
+    // Initialize based on current values
+    if (isRecurringCheck.checked) {
+        recurrenceGroup.style.display = 'block';
+    }
+    
+    if (autoPayCheck.checked) {
+        autoPayGroup.style.display = 'block';
+    }
+});
+</script>
+}

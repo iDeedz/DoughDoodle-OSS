@@ -1,0 +1,151 @@
+@{
+    ViewData["Title"] = "Transfer Between Categories";
+    var monthYear = ViewBag.MonthYear as string ?? DateTime.Now.ToString("yyyy-MM");
+    var categoriesWithSurplus = (ViewBag.CategoriesWithSurplus as List<DoughDoodle.Models.Category>) ?? new List<DoughDoodle.Models.Category>();
+    var allCategories = (ViewBag.AllCategories as List<DoughDoodle.Models.Category>) ?? new List<DoughDoodle.Models.Category>();
+    var monthLabel = DateTime.ParseExact(monthYear + "-01", "yyyy-MM-dd", null).ToString("MMMM yyyy");
+
+    decimal GetAvailable(DoughDoodle.Models.Category c)
+    {
+        var budget = c.Budgets.FirstOrDefault()?.Amount ?? 0;
+        var spent = c.Transactions.Sum(t => t.Amount);
+        return Math.Max(0, budget + spent);
+    }
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-arrow-left-right"></i> Transfer Between Categories — @monthLabel</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!categoriesWithSurplus.Any())
+                    {
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> No categories have surplus funds available to transfer this month.
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="Transfer" method="post">
+                            <input type="hidden" name="monthYear" value="@monthYear" />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fromCategoryId" class="form-label">From Category (with surplus) *</label>
+                                        <select name="fromCategoryId" id="fromCategoryId" class="form-select" required>
+                                            <option value="">Select source category</option>
+                                            @foreach (var category in categoriesWithSurplus)
+                                            {
+                                                var available = GetAvailable(category);
+                                                <option value="@category.Id" data-available="@available">@category.Name — @CurrencyDisplay.Format(available, ViewData["PreferredCurrency"] as string) available</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="toCategoryId" class="form-label">To Category *</label>
+                                        <select name="toCategoryId" id="toCategoryId" class="form-select" required>
+                                            <option value="">Select destination category</option>
+                                            @foreach (var category in allCategories)
+                                            {
+                                                <option value="@category.Id">@category.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                                    <input name="amount" id="amount" type="number" step="0.01" min="0.01" class="form-control" placeholder="0.00" required />
+                                </div>
+                                <div class="form-text" id="availableHint"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <input name="description" id="description" class="form-control" placeholder="Optional note for this transfer" />
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="MonthlyWorkflow" asp-route-monthYear="@monthYear" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Budget
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-arrow-left-right"></i> Transfer Funds
+                                </button>
+                            </div>
+                        </form>
+                    }
+
+                    @if (categoriesWithSurplus.Any())
+                    {
+                        <hr class="my-4" />
+                        <h6><i class="bi bi-list-check"></i> Categories with Surplus</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-end">Available</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var category in categoriesWithSurplus.OrderByDescending(GetAvailable))
+                                    {
+                                        <tr>
+                                            <td>@category.Name</td>
+                                            <td class="text-end text-success">@CurrencyDisplay.Format(GetAvailable(category), ViewData["PreferredCurrency"] as string)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)));
+document.addEventListener('DOMContentLoaded', function() {
+    const fromSelect = document.getElementById('fromCategoryId');
+    const hint = document.getElementById('availableHint');
+    if (!fromSelect || !hint) return;
+
+    function updateHint() {
+        const option = fromSelect.options[fromSelect.selectedIndex];
+        const available = option?.dataset?.available;
+        hint.textContent = available ? 'Maximum available: ' + currencySymbol + parseFloat(available).toFixed(2) : '';
+    }
+
+    fromSelect.addEventListener('change', updateHint);
+    updateHint();
+});
+</script>
+}

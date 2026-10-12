@@ -1,0 +1,235 @@
+@model DoughDoodle.Models.ViewModels.SecurityViewModel
+@{
+    ViewData["Title"] = "Security Settings";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary mb-0">
+                    <i class="bi bi-shield-check"></i> Security Settings
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-light mb-0">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                                <i class="bi bi-house"></i> Home
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Settings" asp-action="Index" class="text-decoration-none">Settings</a>
+                        </li>
+                        <li class="breadcrumb-item active text-decoration-none" aria-current="page">Security</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- User Security Overview -->
+        <div class="col-lg-4">
+            <div class="card bg-light border-primary h-100">
+                <div class="card-header bg-primary text-primary">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-shield"></i> Account Security
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="avatar bg-primary text-primary rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <h6 class="text-decoration-none">@Model.User.UserName</h6>
+                        <small class="text-muted">@Model.User.Email</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-decoration-none">Two-Factor Authentication</span>
+                            @if (Model.TwoFactorEnabled)
+                            {
+                                <span class="badge bg-success">Enabled</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Disabled</span>
+                            }
+                        </div>
+                        <div class="d-grid gap-2">
+                            @if (!Model.TwoFactorEnabled)
+                            {
+                                <form method="post" asp-action="BeginTotpSetup">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-success btn-sm w-100">
+                                        <i class="bi bi-shield-plus"></i> Enable Authenticator 2FA
+                                    </button>
+                                </form>
+                                @if (TempData["TotpSecret"] != null)
+                                {
+                                    <div class="alert alert-secondary small mt-2 text-start">
+                                        <div>Secret: <code>@TempData["TotpSecret"]</code></div>
+                                        <div class="text-break">URI: <code>@TempData["TotpUri"]</code></div>
+                                        <form method="post" asp-action="ConfirmTotp" class="mt-2">
+                                            @Html.AntiForgeryToken()
+                                            <input name="code" class="form-control form-control-sm mb-1" placeholder="6-digit code" required />
+                                            <button class="btn btn-success btn-sm w-100">Confirm</button>
+                                        </form>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <form method="post" asp-action="DisableTotp">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-warning btn-sm w-100">
+                                        <i class="bi bi-shield-minus"></i> Disable 2FA
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-decoration-none">Password Security</span>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 85%"></div>
+                        </div>
+                        <small class="text-muted">Strong</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-key"></i> Change Password
+                        </button>
+                        <button class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-download"></i> Download Recovery Codes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Activity Log -->
+        <div class="col-lg-8">
+            <div class="card bg-light border-primary h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clock-history"></i> Recent Security Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentSecurityLogs.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                        <th>IP Address</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var log in Model.RecentSecurityLogs)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong class="text-decoration-none">@log.Action</strong>
+                                            </td>
+                                            <td class="text-muted">
+                                                @if (!string.IsNullOrEmpty(log.Details))
+                                                {
+                                                    @log.Details
+                                                }
+                                                else
+                                                {
+                                                    <em>No details</em>
+                                                }
+                                            </td>
+                                            <td>
+                                                <code class="text-info">@log.IpAddress</code>
+                                            </td>
+                                            <td class="text-muted">
+                                                @log.Timestamp.ToString("MMM dd, yyyy HH:mm")
+                                            </td>
+                                            <td>
+                                                @if (log.IsSuccessful)
+                                                {
+                                                    <span class="badge bg-success">Success</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">Failed</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-shield-slash text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-3">No Security Activity</h5>
+                            <p class="text-muted">No recent security events to display.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light border-primary">
+                <div class="card-header bg-danger text-primary">
+                    <h5 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Security Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-shield-check text-success" style="font-size: 2rem;"></i>
+                                <h6 class="text-decoration-none mt-2">Password Strength</h6>
+                                <p class="text-muted small">Use a strong, unique password with at least 12 characters including uppercase, lowercase, numbers, and symbols.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-phone text-info" style="font-size: 2rem;"></i>
+                                <h6 class="text-decoration-none mt-2">Two-Factor Authentication</h6>
+                                <p class="text-muted small">Enable 2FA to add an extra layer of security to your account using your phone or authenticator app.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-eye text-warning" style="font-size: 2rem;"></i>
+                                <h6 class="text-decoration-none mt-2">Monitor Activity</h6>
+                                <p class="text-muted small">Regularly review your security logs and report any suspicious activity immediately.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Security Tip:</strong> Never share your login credentials with anyone. DoughDoodle staff will never ask for your password.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Settings
+        </a>
+    </div>
+</div>

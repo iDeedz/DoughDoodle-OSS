@@ -1,0 +1,134 @@
+@model IEnumerable<DoughDoodle.Models.BillPayment>
+@{
+    ViewData["Title"] = "Payment History";
+    var bill = ViewBag.Bill as DoughDoodle.Models.Bill;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-clock-history"></i> Payment History</h2>
+                <div>
+                    @if (bill != null)
+                    {
+                        <a href="@Url.Action("Edit", new { id = bill.Id })" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil-square"></i> Edit Bill
+                        </a>
+                    }
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Bills
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (bill != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-1">@bill.Name</h5>
+                                @if (!string.IsNullOrEmpty(bill.Payee))
+                                {
+                                    <p class="text-muted mb-1">@bill.Payee</p>
+                                }
+                                @if (bill.Category != null)
+                                {
+                                    <span class="badge bg-secondary">@bill.Category.Name</span>
+                                }
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <div class="fw-bold fs-4">@CurrencyDisplay.Format(bill.Amount, ViewData["PreferredCurrency"] as string)</div>
+                                <small class="text-muted">Current amount</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Payments (@Model.Count())</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Payment Date</th>
+                                        <th>Amount Paid</th>
+                                        <th>Due Date</th>
+                                        <th>Method</th>
+                                        <th>Confirmation</th>
+                                        <th>Status</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var payment in Model)
+                                    {
+                                        <tr>
+                                            <td>@payment.PaymentDate.ToString("MMM dd, yyyy")</td>
+                                            <td class="fw-bold text-success">@CurrencyDisplay.Format(payment.AmountPaid, ViewData["PreferredCurrency"] as string)</td>
+                                            <td>@payment.DueDateWhenPaid.ToString("MMM dd, yyyy")</td>
+                                            <td>@payment.PaymentMethod</td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(payment.ConfirmationNumber))
+                                                {
+                                                    <span class="text-muted">@payment.ConfirmationNumber</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (payment.IsLate)
+                                                {
+                                                    <span class="badge bg-danger">Late</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success">On Time</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(payment.Notes))
+                                                {
+                                                    <span class="text-muted">@payment.Notes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-receipt display-4 text-muted"></i>
+                            <h5 class="text-muted mt-3">No Payments Recorded</h5>
+                            <p class="text-muted">Payments will appear here when this bill is marked as paid.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

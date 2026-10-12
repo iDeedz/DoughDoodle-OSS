@@ -1,0 +1,88 @@
+@model List<DoughDoodle.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Household";
+    var canAdd = ViewBag.CanAdd as bool? ?? false;
+    var limit = ViewBag.SubAccountLimit as int? ?? 1;
+    var upgrade = ViewBag.UpgradeRequired as bool? ?? false;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1><i class="bi bi-people"></i> Household</h1>
+            <p class="text-muted mb-0">Share envelopes with a partner or family — one owner, shared budgets, clear roles.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="TeamBudgets" asp-action="Index" class="btn btn-outline-secondary">Shared envelopes</a>
+            <a asp-controller="Dashboard" asp-action="FamilyDashboard" class="btn btn-outline-primary">Household overview</a>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] is string err) { <div class="alert alert-danger">@err</div> }
+    @if (TempData["SuccessMessage"] is string ok) { <div class="alert alert-success">@ok</div> }
+
+    @if (upgrade)
+    {
+        <div class="alert alert-warning">
+            Household sharing unlocks on <strong>Bankroll</strong> and above.
+            <a asp-controller="Billing" asp-action="Index" class="alert-link">See plans</a>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white"><strong>Members</strong> <span class="text-muted small">(seat limit: @(limit == int.MaxValue ? "∞" : limit.ToString()))</span></div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var m in Model)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <strong>@m.FullName</strong>
+                                <div class="small text-muted">@m.Email · @m.UserType · @m.HouseholdRole</div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (m.UserType == DoughDoodle.Models.UserType.SubAccount)
+                                {
+                                    <form method="post" asp-action="SetRole" class="d-flex gap-1">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="memberId" value="@m.Id" />
+                                        <select name="role" class="form-select form-select-sm">
+                                            <option value="Member">Member</option>
+                                            <option value="Editor">Editor</option>
+                                            <option value="HouseholdAdmin">HouseholdAdmin</option>
+                                        </select>
+                                        <button class="btn btn-sm btn-outline-primary">Set role</button>
+                                    </form>
+                                }
+                                <span class="badge @(m.IsActive ? "bg-success" : "bg-secondary")">@(m.IsActive ? "Active" : "Off")</span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white"><strong>Invite a member</strong></div>
+                <div class="card-body">
+                    @if (!canAdd)
+                    {
+                        <p class="text-muted mb-0">Upgrade or free a seat to invite more household members.</p>
+                    }
+                    else
+                    {
+                        <form method="post" asp-action="Invite">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-2"><input name="firstName" class="form-control" placeholder="First name" required /></div>
+                            <div class="mb-2"><input name="lastName" class="form-control" placeholder="Last name" required /></div>
+                            <div class="mb-2"><input name="email" type="email" class="form-control" placeholder="Email" required /></div>
+                            <div class="mb-3"><input name="password" type="password" class="form-control" placeholder="Temp password" required minlength="6" /></div>
+                            <button type="submit" class="btn btn-primary w-100">Invite</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,140 @@
+@{
+    ViewData["Title"] = "Help Center";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Section -->
+            <div class="text-center mb-5">
+                <h1><i class="bi bi-question-circle text-primary"></i> Help Center</h1>
+                <p class="lead text-muted">Everything you need to know about DoughDoodle</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-primary mb-3">
+                        <i class="bi bi-play-circle"></i>
+                    </div>
+                    <h5 class="card-title">Getting Started</h5>
+                    <p class="card-text">Learn the basics of setting up your budget and creating your first envelopes.</p>
+                    <a asp-action="GettingStarted" class="btn btn-primary">Get Started</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-warning mb-3">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <h5 class="card-title">AI Features (NEW)</h5>
+                    <p class="card-text">Master AI-powered tools: Smart Categorization, Budget Forecasting, and Personal Coaching.</p>
+                    <a asp-action="AIFeatures" class="btn btn-warning">Explore AI</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-success mb-3">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <h5 class="card-title">Envelope Budgeting</h5>
+                    <p class="card-text">Understand how envelope budgeting works and how to master your finances.</p>
+                    <a asp-action="EnvelopeBudgeting" class="btn btn-success">Learn More</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-info mb-3">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h5 class="card-title">Reports & Analytics</h5>
+                    <p class="card-text">Make sense of your spending patterns with detailed reports and trend analysis.</p>
+                    <a asp-action="Reports" class="btn btn-info">View Reports Help</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Section -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-question-circle"></i> Frequently Asked Questions</h5>
+                </div>
+                <div class="card-body">
+                    <p>Find answers to common questions about using DoughDoodle.</p>
+                    <a asp-action="FAQ" class="btn btn-outline-primary">Browse FAQ</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-headset"></i> Contact Support</h5>
+                </div>
+                <div class="card-body">
+                    <p>Need additional help? Our support team is here to assist you.</p>
+                    <a asp-action="Support" class="btn btn-outline-success">Get Support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-star"></i> Key Features</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success"></i> Multi-user account management</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Multiple AI provider support (GROK, OpenAI, Gemini)</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Interactive trend analysis and reports</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Advanced transaction categorization</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success"></i> Family and sub-account management</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Goal setting and tracking</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Import/Export capabilities</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Professional analytics dashboard</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.display-4 {
+    font-size: 2.5rem;
+}
+</style>

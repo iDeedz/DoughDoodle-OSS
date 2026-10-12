@@ -1,0 +1,366 @@
+@model List<DoughDoodle.Models.ViewModels.MonthlyReportItem>
+@{
+    ViewData["Title"] = "Monthly Report";
+    var curSym = CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string);
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1><i class="bi bi-calendar-month text-primary"></i> Monthly Report</h1>
+            <p class="lead text-muted">Detailed breakdown for @ViewBag.SelectedMonthName</p>
+        </div>
+        <div class="d-flex gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-calendar3"></i> @ViewBag.SelectedMonthName
+                </button>
+                <ul class="dropdown-menu">
+                    @foreach (var month in (List<string>)ViewBag.AvailableMonths)
+                    {
+                        <li><a class="dropdown-item" href="@Url.Action("MonthlyReport", new { month = month })">
+                            @DateTime.ParseExact(month + "-01", "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture).ToString("MMMM yyyy")
+                        </a></li>
+                    }
+                </ul>
+            </div>
+            <a href="@Url.Action("Index")" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Overview
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Budgeted</h6>
+                    <h4 class="card-title text-success">@CurrencyDisplay.Format(Model.Sum(x => x.BudgetedAmount), ViewData["PreferredCurrency"] as string)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Total Spent</h6>
+                    <h4 class="card-title text-primary">@CurrencyDisplay.Format(Model.Sum(x => x.ActualAmount), ViewData["PreferredCurrency"] as string)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Remaining</h6>
+                    <h4 class="card-title text-info">@CurrencyDisplay.Format(Model.Sum(x => x.RemainingAmount), ViewData["PreferredCurrency"] as string)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <h6 class="card-subtitle mb-2 text-muted">Categories</h6>
+                    <h4 class="card-title text-warning">@Model.Count(x => x.ActualAmount > 0)</h4>
+                    <small class="text-muted">of @Model.Count</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-bar-chart-steps"></i> Category Breakdown</h5>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary active" onclick="showView('table')">Table View</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="showView('chart')">Chart View</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Table View -->
+            <div id="tableView">
+                @if (Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Budgeted</th>
+                                    <th class="text-end">Spent</th>
+                                    <th class="text-end">Remaining</th>
+                                    <th class="text-center">Utilization</th>
+                                    <th class="text-center">Transactions</th>
+                                    <th class="text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderByDescending(x => x.ActualAmount))
+                                {
+                                    <tr class="@(item.IsOverBudget ? "table-warning" : "")">
+                                        <td>
+                                            <strong>@item.CategoryName</strong>
+                                            @if (item.IsOverBudget)
+                                            {
+                                                <i class="bi bi-exclamation-triangle text-warning ms-1" title="Over budget"></i>
+                                            }
+                                        </td>
+                                        <td class="text-end">@CurrencyDisplay.Format(item.BudgetedAmount, ViewData["PreferredCurrency"] as string)</td>
+                                        <td class="text-end">@CurrencyDisplay.Format(item.ActualAmount, ViewData["PreferredCurrency"] as string)</td>
+                                        <td class="text-end">
+                                            <span class="@(item.RemainingAmount >= 0 ? "text-success" : "text-danger")">
+                                                @CurrencyDisplay.Format(item.RemainingAmount, ViewData["PreferredCurrency"] as string)
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                <div class="progress me-2" style="width: 80px; height: 8px;">
+                                                    <div class="progress-bar @(item.BudgetUtilizationPercentage > 100 ? "bg-danger" : item.BudgetUtilizationPercentage > 80 ? "bg-warning" : "bg-success")" 
+                                                         style="width: @Math.Min(item.BudgetUtilizationPercentage, 100)%;"></div>
+                                                </div>
+                                                <small>@item.BudgetUtilizationPercentage.ToString("F0")%</small>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-secondary">@item.TransactionCount</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (item.BudgetedAmount == 0)
+                                            {
+                                                <span class="badge bg-light text-dark">No Budget</span>
+                                            }
+                                            else if (item.IsOverBudget)
+                                            {
+                                                <span class="badge bg-danger">Over Budget</span>
+                                            }
+                                            else if (item.BudgetUtilizationPercentage > 80)
+                                            {
+                                                <span class="badge bg-warning">High Usage</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">On Track</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-calendar-x" style="font-size: 4rem; opacity: 0.3;"></i>
+                        <h4 class="mt-3">No Data for This Month</h4>
+                        <p>There are no transactions recorded for @ViewBag.SelectedMonthName</p>
+                    </div>
+                }
+            </div>
+
+            <!-- Chart View -->
+            <div id="chartView" style="display: none;">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">Budget vs Actual</h6>
+                        <canvas id="budgetActualChart" width="400" height="300"></canvas>
+                    </div>
+                    <div class="col-lg-6">
+                        <h6 class="mb-3">Spending Distribution</h6>
+                        <canvas id="spendingPieChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Transactions (Expandable) -->
+    @if (Model.Any(x => x.Transactions.Any()))
+    {
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <button class="btn btn-link text-decoration-none p-0" type="button" data-bs-toggle="collapse" data-bs-target="#transactionDetails">
+                            <i class="bi bi-chevron-down"></i> Detailed Transactions
+                        </button>
+                    </h5>
+                </div>
+                <div class="collapse" id="transactionDetails">
+                    <div class="card-body">
+                        @foreach (var category in Model.Where(x => x.Transactions.Any()).OrderByDescending(x => x.ActualAmount))
+                        {
+                            <div class="mb-4">
+                                <h6 class="border-bottom pb-2">
+                                    @category.CategoryName 
+                                    <small class="text-muted">(@category.Transactions.Count transactions)</small>
+                                </h6>
+                                <div class="row">
+                                    @foreach (var transaction in category.Transactions.Take(5))
+                                    {
+                                        <div class="col-md-6 col-lg-4 mb-2">
+                                            <div class="card card-sm">
+                                                <div class="card-body p-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <small class="fw-bold">@transaction.Description</small>
+                                                            <br>
+                                                            <small class="text-muted">@transaction.Date.ToString("MMM dd")</small>
+                                                        </div>
+                                                        <span class="badge bg-primary">@CurrencyDisplay.Format(transaction.Amount, ViewData["PreferredCurrency"] as string)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    @if (category.Transactions.Count > 5)
+                                    {
+                                        <div class="col-12">
+                                            <small class="text-muted">... and @(category.Transactions.Count - 5) more transactions</small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.card-sm {
+    font-size: 0.875rem;
+}
+
+.progress {
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.btn-link {
+    color: inherit !important;
+}
+
+.btn-link:hover {
+    color: var(--bs-primary) !important;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryData = @Html.Raw(Json.Serialize(Model.Select(x => new { 
+        Category = x.CategoryName, 
+        Budgeted = x.BudgetedAmount, 
+        Actual = x.ActualAmount 
+    })));
+
+    let budgetActualChart, spendingPieChart;
+
+    function initCharts() {
+        // Budget vs Actual Chart
+        const ctx1 = document.getElementById('budgetActualChart');
+        if (ctx1) {
+            budgetActualChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: categoryData.map(d => d.Category),
+                    datasets: [{
+                        label: 'Budgeted',
+                        data: categoryData.map(d => d.Budgeted),
+                        backgroundColor: '#28a745',
+                        borderColor: '#28a745',
+                        borderWidth: 1
+                    }, {
+                        label: 'Actual',
+                        data: categoryData.map(d => d.Actual),
+                        backgroundColor: '#007bff',
+                        borderColor: '#007bff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return curSym + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + curSym + context.parsed.y.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Spending Pie Chart
+        const ctx2 = document.getElementById('spendingPieChart');
+        if (ctx2) {
+            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+            spendingPieChart = new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: categoryData.filter(d => d.Actual > 0).map(d => d.Category),
+                    datasets: [{
+                        data: categoryData.filter(d => d.Actual > 0).map(d => d.Actual),
+                        backgroundColor: colors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed * 100) / total).toFixed(1);
+                                    return context.label + ': ' + curSym + context.parsed.toLocaleString() + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // View toggle function
+    window.showView = function(viewType) {
+        const tableView = document.getElementById('tableView');
+        const chartView = document.getElementById('chartView');
+        const buttons = document.querySelectorAll('.btn-group button');
+
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        if (viewType === 'table') {
+            tableView.style.display = 'block';
+            chartView.style.display = 'none';
+            buttons[0].classList.add('active');
+        } else {
+            tableView.style.display = 'none';
+            chartView.style.display = 'block';
+            buttons[1].classList.add('active');
+            
+            // Initialize charts when chart view is shown
+            setTimeout(initCharts, 100);
+        }
+    };
+});
+</script>

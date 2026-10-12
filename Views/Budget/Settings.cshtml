@@ -1,0 +1,112 @@
+@model DoughDoodle.Models.BudgetSettings
+@{
+    ViewData["Title"] = "Budget Settings";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-gear"></i> Budget Settings</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Settings" method="post">
+                        <input type="hidden" asp-for="Id" />
+
+                        <h6 class="text-muted mb-3"><i class="bi bi-arrow-repeat"></i> Rollover Settings</h6>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="AutoRolloverSurplus" class="form-check-input" type="checkbox" />
+                                <label asp-for="AutoRolloverSurplus" class="form-check-label">Automatically roll over surplus to next month</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="AutoRolloverOverspend" class="form-check-input" type="checkbox" />
+                                <label asp-for="AutoRolloverOverspend" class="form-check-label">Automatically roll over overspend to next month</label>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="AllowCoverOverspendFromOtherCategories" class="form-check-input" type="checkbox" />
+                                <label asp-for="AllowCoverOverspendFromOtherCategories" class="form-check-label">Allow covering overspend from other categories</label>
+                            </div>
+                        </div>
+
+                        <h6 class="text-muted mb-3"><i class="bi bi-cash-stack"></i> Income Settings</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="DefaultIncomeAllocation" class="form-label">Default Income Allocation</label>
+                                <select asp-for="DefaultIncomeAllocation" class="form-select" asp-items="Html.GetEnumSelectList<DoughDoodle.Models.IncomeAllocation>()"></select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="AutoHoldIncomeForNextMonth" class="form-check-input" type="checkbox" />
+                                <label asp-for="AutoHoldIncomeForNextMonth" class="form-check-label">Auto-hold income for next month</label>
+                            </div>
+                        </div>
+
+                        <h6 class="text-muted mb-3"><i class="bi bi-calendar3"></i> Budget Creation</h6>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="CopyLastMonthBudgets" class="form-check-input" type="checkbox" />
+                                <label asp-for="CopyLastMonthBudgets" class="form-check-label">Copy last month's budgets by default</label>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="FillBudgetsFromAccountBalances" class="form-check-input" type="checkbox" />
+                                <label asp-for="FillBudgetsFromAccountBalances" class="form-check-label">Fill budgets from account balances</label>
+                            </div>
+                        </div>
+
+                        <h6 class="text-muted mb-3"><i class="bi bi-palette"></i> Display Settings</h6>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="EnableDarkMode" class="form-check-input" type="checkbox" />
+                                <label asp-for="EnableDarkMode" class="form-check-label">Enable dark mode</label>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="ColorTheme" class="form-label">Color Theme</label>
+                                <select asp-for="ColorTheme" class="form-select">
+                                    <option value="default">Default</option>
+                                    <option value="ocean">Ocean</option>
+                                    <option value="forest">Forest</option>
+                                    <option value="sunset">Sunset</option>
+                                    <option value="minimal">Minimal</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="MinimalUI" class="form-check-input" type="checkbox" />
+                                <label asp-for="MinimalUI" class="form-check-label">Use minimal UI</label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

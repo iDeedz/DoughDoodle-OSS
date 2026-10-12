@@ -1,0 +1,250 @@
+@model DoughDoodle.Models.ViewModels.SettingsViewModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary mb-0">
+                    <i class="bi bi-gear"></i> Settings
+                </h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb bg-light mb-0">
+                        <li class="breadcrumb-item">
+                            <a asp-controller="Home" asp-action="Index" class="text-decoration-none">
+                                <i class="bi bi-house"></i> Home
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active text-decoration-none" aria-current="page">Settings</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white"><h5 class="mb-0"><i class="bi bi-currency-exchange"></i> Currency</h5></div>
+                <div class="card-body">
+                    <form asp-action="UpdateCurrency" method="post" class="row g-3 align-items-end">
+                        @Html.AntiForgeryToken()
+                        <div class="col-md-6">
+                            <label class="form-label" for="preferredCurrency">Preferred currency</label>
+                            <select class="form-select" id="preferredCurrency" name="preferredCurrency">
+                                @foreach (var code in new[] { "USD", "ZAR", "EUR", "GBP", "AUD", "CAD", "JPY" })
+                                {
+                                    <option value="@code" selected="@(Model.PreferredCurrency == code)">@code (@CurrencyDisplay.Symbol(code))</option>
+                                }
+                            </select>
+                            <div class="form-text">Display label only; amounts are not converted.</div>
+                        </div>
+                        <div class="col-md-auto"><button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save currency</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Budget Settings -->
+        <div class="col-lg-6">
+            <div class="card bg-light border-primary h-100">
+                <div class="card-header bg-primary text-primary">
+                    <h5 class="mb-0">
+                        <i class="bi bi-wallet"></i> Budget Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model?.BudgetSettings != null)
+                    {
+                        <form asp-action="UpdateBudgetSettings" method="post">
+                            <input type="hidden" asp-for="BudgetSettings.Id" />
+                            <input type="hidden" asp-for="BudgetSettings.UserId" />
+                            
+                            <div class="mb-3">
+                                <h6 class="text-decoration-none mb-2">Rollover Settings</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="BudgetSettings.AutoRolloverSurplus" id="autoRolloverSurplus">
+                                    <label class="form-check-label text-decoration-none" for="autoRolloverSurplus">
+                                        Auto-rollover surplus amounts to next month
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="BudgetSettings.AutoRolloverOverspend" id="autoRolloverOverspend">
+                                    <label class="form-check-label text-decoration-none" for="autoRolloverOverspend">
+                                        Auto-rollover overspend to next month
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" asp-for="BudgetSettings.AllowCoverOverspendFromOtherCategories" id="allowCoverOverspend">
+                                    <label class="form-check-label text-decoration-none" for="allowCoverOverspend">
+                                        Allow covering overspend from other categories
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="text-decoration-none mb-2">Income Settings</h6>
+                                <div class="mb-2">
+                                    <label class="form-label text-decoration-none" for="defaultIncomeAllocation">Default Income Allocation</label>
+                                    <select class="form-select" asp-for="BudgetSettings.DefaultIncomeAllocation" id="defaultIncomeAllocation">
+                                        <option value="1">Available Immediately</option>
+                                        <option value="2">Hold for Next Month</option>
+                                        <option value="3">Auto-Hold Based on Settings</option>
+                                    </select>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" asp-for="BudgetSettings.AutoHoldIncomeForNextMonth" id="autoHoldIncome">
+                                    <label class="form-check-label text-decoration-none" for="autoHoldIncome">
+                                        Auto-hold income for next month
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Budget Settings
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Loading budget settings...</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="col-lg-6">
+            <div class="card bg-light border-primary h-100">
+                <div class="card-header bg-info text-primary">
+                    <h5 class="mb-0">
+                        <i class="bi bi-bell"></i> Notification Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model?.NotificationSettings != null)
+                    {
+                        <form asp-action="UpdateNotificationSettings" method="post">
+                            <input type="hidden" asp-for="NotificationSettings.Id" />
+                            <input type="hidden" asp-for="NotificationSettings.UserId" />
+                            
+                            <div class="mb-3">
+                                <h6 class="text-decoration-none mb-2">Notification Types</h6>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="NotificationSettings.BudgetAlerts" id="budgetAlerts">
+                                    <label class="form-check-label text-decoration-none" for="budgetAlerts">
+                                        Budget alerts when approaching limits
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="NotificationSettings.GoalReminders" id="goalReminders">
+                                    <label class="form-check-label text-decoration-none" for="goalReminders">
+                                        Goal progress reminders
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="NotificationSettings.ScheduledTransactionReminders" id="scheduledTransactionReminders">
+                                    <label class="form-check-label text-decoration-none" for="scheduledTransactionReminders">
+                                        Scheduled transaction reminders
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" asp-for="NotificationSettings.EmailNotifications" id="emailNotifications">
+                                    <label class="form-check-label text-decoration-none" for="emailNotifications">
+                                        Email notifications
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label text-decoration-none" for="budgetThreshold">Budget Alert Threshold (%)</label>
+                                <input type="number" class="form-control" asp-for="NotificationSettings.BudgetThreshold" id="budgetThreshold" min="0" max="100" />
+                                <div class="form-text text-muted">Send alert when budget reaches this percentage</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-info">
+                                <i class="bi bi-save"></i> Save Notification Settings
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Loading notification settings...</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light border-primary">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-exclamation"></i> Security & Privacy
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-decoration-none mb-3">Security Settings</h6>
+                            <div class="d-grid gap-2">
+                                <a asp-action="Security" class="btn btn-outline-warning">
+                                    <i class="bi bi-shield-check"></i> View Security Logs
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-decoration-none mb-3">Data Management</h6>
+                            <div class="d-grid gap-2">
+                                <form asp-action="ExportData" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-success w-100">
+                                        <i class="bi bi-download"></i> Export My Data
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- UI Preferences -->
+        <div class="col-lg-12">
+            <div class="card bg-light border-primary">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-palette"></i> UI Preferences
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-decoration-none mb-3">Color Theme</h6>
+                            @await Html.PartialAsync("_ThemeSwitcher")
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-decoration-none mb-3">Display Options</h6>
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> 
+                                <strong>New!</strong> Additional theme options now available including Ocean Blue, Forest Green, Sunset, Purple, and High Contrast modes.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

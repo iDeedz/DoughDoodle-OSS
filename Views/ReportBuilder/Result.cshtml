@@ -1,0 +1,10 @@
+@{ ViewData["Title"] = "Report result"; }
+<h2>@ViewBag.Name</h2>
+<p>@(((DateTime)ViewBag.Start).ToString("yyyy-MM-dd")) → @(((DateTime)ViewBag.End).ToString("yyyy-MM-dd"))</p>
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="card card-body"><div class="text-muted">Income</div><div class="fs-4">@CurrencyDisplay.Format((decimal)ViewBag.Income, ViewData["PreferredCurrency"] as string)</div></div></div>
+  <div class="col-md-4"><div class="card card-body"><div class="text-muted">Expense</div><div class="fs-4">@CurrencyDisplay.Format((decimal)ViewBag.Expense, ViewData["PreferredCurrency"] as string)</div></div></div>
+  <div class="col-md-4"><div class="card card-body"><div class="text-muted">Net</div><div class="fs-4">@CurrencyDisplay.Format((decimal)ViewBag.Net, ViewData["PreferredCurrency"] as string)</div></div></div>
+</div>
+<a class="btn btn-outline-secondary" asp-action="ExportCsv" asp-route-startDate="@ViewBag.Start" asp-route-endDate="@ViewBag.End">Export CSV</a>
+<a class="btn btn-link" asp-action="Index">Back</a>

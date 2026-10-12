@@ -1,0 +1,21 @@
+@model IEnumerable<DoughDoodle.Models.ImportColumnMapping>
+@{ ViewData["Title"] = "Import mapping templates"; var banks = (string[])ViewBag.BankTemplates; }
+<h2>CSV / bank mapping templates</h2>
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+<form method="post" asp-action="SaveMapping" class="card card-body mb-3">
+  @Html.AntiForgeryToken()
+  <div class="row g-2">
+    <div class="col-md-3"><input name="templateName" class="form-control" placeholder="Template name" required /></div>
+    <div class="col-md-3"><select name="bankTemplate" class="form-select">@foreach (var b in banks){<option>@b</option>}</select></div>
+    <div class="col-md-2"><input name="dateColumn" class="form-control" placeholder="Date col" value="Date" /></div>
+    <div class="col-md-2"><input name="amountColumn" class="form-control" placeholder="Amount col" value="Amount" /></div>
+    <div class="col-md-2"><input name="descriptionColumn" class="form-control" placeholder="Desc col" value="Description" /></div>
+  </div>
+  <button class="btn btn-primary mt-2">Save mapping</button>
+</form>
+<ul class="list-group">
+@foreach (var m in Model) {
+  <li class="list-group-item"><strong>@m.TemplateName</strong> (@m.BankTemplate) <code>@m.MappingJson</code></li>
+}
+</ul>
+<a asp-action="Index">Back to import</a>

@@ -1,0 +1,565 @@
+﻿@model List<DoughDoodle.Models.Category>
+@{
+    ViewData["Title"] = "Envelopes";
+    var cc = ViewData["PreferredCurrency"] as string;
+}
+<div class="container-fluid dd-envelopes">
+  <div class="dd-page-header dd-fade-up">
+    <div>
+      <div class="dd-accent-bar"></div>
+      <h1>@DateTime.Parse(ViewBag.CurrentMonth + "-01").ToString("MMMM yyyy")</h1>
+      <p class="dd-subtitle">Assign every bit of dough to an envelope</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <a asp-action="AddCategory" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-circle"></i> New Envelope
+      </a>
+      <a asp-action="AddTransaction" class="btn btn-secondary btn-sm">
+        <i class="bi bi-receipt"></i> Add Transaction
+      </a>
+    </div>
+  </div>
+  <div class="row g-3">
+      <!-- Left Sidebar: Monthly Overview -->
+      <div class="col-lg-3">
+        <div class="monthly-overview-card">
+        <h5 class="dd-rail-title">Monthly Overview</h5>
+        @{
+          var monthlyIncome = ViewBag.MonthlyIncome ?? 0m;
+          var totalBudgetedLeft = Model.Sum(c => c.Budgets.FirstOrDefault(b => b.MonthYear == ViewBag.CurrentMonth)?.Amount ?? 0);
+          var totalSpentLeft = Model.Sum(c => c.Transactions.Where(t => t.Date.ToString("yyyy-MM") == ViewBag.CurrentMonth).Sum(t => t.Amount));
+          var availableToBudget = monthlyIncome - totalBudgetedLeft;
+        }
+        <div class="income-card mb-3">
+          <div class="dd-metric-label">Monthly income</div>
+          <div class="dd-metric-value amount">@CurrencyDisplay.Format(monthlyIncome, cc)</div>
+          <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="setMonthlyIncome()">
+            <i class="bi bi-pencil"></i> Set income
+          </button>
+        </div>
+        <div class="budget-available-card @(availableToBudget < 0 ? "negative" : "")">
+          <div class="dd-metric-label">Available to budget</div>
+          <div class="dd-metric-value amount">@CurrencyDisplay.Format(availableToBudget, cc)</div>
+          @if (availableToBudget < 0)
+          {
+            <div class="dd-metric-meta text-danger">Over by @CurrencyDisplay.Format(Math.Abs(availableToBudget), cc)</div>
+          }
+          else
+          {
+            <div class="dd-metric-meta">Ready to assign</div>
+          }
+        </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-lg-6">
+        <div class="budget-table-container">
+        <ul class="nav nav-tabs dd-tabs mb-3">
+          <li class="nav-item">
+            <a class="nav-link" id="tab-all" href="#" onclick="filterCategories('all')">All</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tab-underfunded" href="#" onclick="filterCategories('underfunded')">Underfunded</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="tab-overfunded" href="#" onclick="filterCategories('overfunded')">Overfunded</a>
+          </li>
+        </ul>
+
+          <table class="table table-hover dd-table budget-table">
+          <thead>
+            <tr>
+              <th>Envelope Category</th>
+              <th>Budgeted</th>
+              <th>Spent</th>
+              <th>Remaining</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (Model.Any())
+            {
+              @foreach (var cat in Model)
+              {
+                var currentBudget = cat.Budgets.FirstOrDefault(b => b.MonthYear == ViewBag.CurrentMonth)?.Amount ?? 0;
+                var spent = cat.Transactions.Where(t => t.Date.ToString("yyyy-MM") == ViewBag.CurrentMonth).Sum(t => t.Amount);
+                var remaining = currentBudget - spent;
+                var progressPercent = currentBudget > 0 ? (spent / currentBudget * 100) : 0;
+                var progressClass = remaining > 0 ? "bg-success" : remaining == 0 ? "bg-warning" : "bg-danger";
+                var categoryStatus = currentBudget == 0 ? "unfunded" : remaining < 0 ? "overfunded" : remaining > 0 ? "underfunded" : "balanced";
+                <tr class="category-row" data-status="@categoryStatus">
+                  <td>
+                    <i class="bi bi-envelope-fill me-2"></i>
+                    <strong>@cat.Name</strong>
+                  </td>
+                  <td>
+                    @CurrencyDisplay.Format(currentBudget, ViewData["PreferredCurrency"] as string)
+                    @if (currentBudget == 0)
+                    {
+                      <small class="text-muted d-block">Click to set budget</small>
+                    }
+                  </td>
+                  <td>@CurrencyDisplay.Format(spent, ViewData["PreferredCurrency"] as string)</td>
+                  <td>
+                    <span class="@(remaining >= 0 ? "text-success" : "text-danger")">
+                      @CurrencyDisplay.Format(remaining, ViewData["PreferredCurrency"] as string)
+                    </span>
+                    @if (currentBudget > 0)
+                    {
+                      <div class="budget-progress mt-1">
+                        <div class="budget-progress-bar @(remaining < 0 ? "over-budget" : remaining < currentBudget * 0.2m ? "warning" : "")" style="width: @Math.Min(progressPercent, 100)%;"></div>
+                      </div>
+                      <small class="text-muted">@progressPercent.ToString("F1")% used</small>
+                    }
+                  </td>
+                  <td>
+                    <div class="dd-row-actions" role="group">
+                      <button type="button" class="btn-icon"
+                              onclick="setBudget(@cat.Id, '@cat.Name')"
+                              title="Set budget"
+                              aria-label="Set budget">
+                        <i class="bi bi-wallet2"></i>
+                      </button>
+                      <a asp-action="EditCategory"
+                         asp-route-id="@cat.Id"
+                         class="btn-icon"
+                         title="Edit envelope"
+                         aria-label="Edit envelope">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <button type="button" class="btn-icon btn-icon-danger"
+                              onclick="deleteCategory(@cat.Id, '@cat.Name')"
+                              title="Delete envelope"
+                              aria-label="Delete envelope">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+            else
+            {
+              <tr>
+                <td colspan="5" class="p-0">
+                  <div class="dd-empty m-3">
+                    <img src="~/images/branding/empty-envelopes.svg" asp-append-version="true" alt="No envelopes yet" />
+                    <h4>No envelopes yet — fund this month</h4>
+                    <p>Create your first budget envelope and assign every dollar a job.</p>
+                    <a asp-action="AddCategory" class="btn btn-primary">
+                      <i class="bi bi-plus-circle"></i> Create your first envelope
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Sidebar: Actions and Summary -->
+      <div class="col-lg-3">
+        <div class="quick-actions-card">
+        <h5 class="dd-rail-title">Quick Actions</h5>
+        <div class="d-grid gap-2 mb-3">
+          <a asp-action="AddCategory" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Envelope
+          </a>
+          <a asp-action="AddTransaction" class="btn btn-secondary">
+            <i class="bi bi-receipt"></i> Add Transaction
+          </a>
+        </div>
+
+        <h6 class="dd-rail-subtitle">Budget Summary</h6>
+        @{
+          var totalBudgeted = Model.Sum(c => c.Budgets.FirstOrDefault(b => b.MonthYear == ViewBag.CurrentMonth)?.Amount ?? 0);
+          var totalSpent = Model.Sum(c => c.Transactions.Where(t => t.Date.ToString("yyyy-MM") == ViewBag.CurrentMonth).Sum(t => t.Amount));
+          var totalRemaining = totalBudgeted - totalSpent;
+        }
+        <div class="card budget-summary-card">
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-12 mb-2">
+                <div class="budget-summary-item">
+                  <div class="label">BUDGETED</div>
+                  <div class="value">@CurrencyDisplay.Format(totalBudgeted, ViewData["PreferredCurrency"] as string)</div>
+                </div>
+              </div>
+              <div class="col-12 mb-2">
+                <div class="budget-summary-item">
+                  <div class="label">SPENT</div>
+                  <div class="value">@CurrencyDisplay.Format(totalSpent, ViewData["PreferredCurrency"] as string)</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <div class="budget-summary-item">
+                  <div class="label">REMAINING</div>
+                  <div class="value @(totalRemaining >= 0 ? "text-success" : "text-danger")">@CurrencyDisplay.Format(totalRemaining, ViewData["PreferredCurrency"] as string)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coach / tips rail (routes preserved) -->
+        <div class="ai-advisor-card mt-3">
+          <div class="dd-callout-header">
+            <i class="bi bi-lightbulb"></i>
+            <span>Budget coach</span>
+          </div>
+          <ul class="dd-link-list">
+            <li>
+              <button type="button" class="dd-link-list-btn" onclick="getAIRecommendations()">
+                <i class="bi bi-lightbulb"></i> Tips for this month
+              </button>
+            </li>
+            <li>
+              <a asp-controller="AIAdvisor" asp-action="DebtManager">
+                <i class="bi bi-credit-card"></i> Debt payoff
+              </a>
+            </li>
+            <li>
+              <a asp-controller="AIAdvisor" asp-action="SavingsPlanner">
+                <i class="bi bi-piggy-bank"></i> Savings plan
+              </a>
+            </li>
+            <li>
+              <a asp-controller="AIAdvisor" asp-action="SmartInsights">
+                <i class="bi bi-graph-up-arrow"></i> Insights
+              </a>
+            </li>
+            <li>
+              <a asp-controller="AIAdvisor" asp-action="BudgetForecasting">
+                <i class="bi bi-calendar3"></i> Forecast
+              </a>
+            </li>
+            <li>
+              <button type="button" class="dd-link-list-btn" onclick="getPersonalCoach()">
+                <i class="bi bi-chat-dots"></i> Coach
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dd-link-list-btn" onclick="categorizeTransactions()">
+                <i class="bi bi-tags"></i> Categorize
+              </button>
+            </li>
+          </ul>
+
+          <div id="ai-recommendations" class="mt-3" style="display:none;">
+            <div class="dd-callout">
+              <div class="dd-callout-title">Insights</div>
+              <div id="ai-main-advice" class="mb-2"></div>
+              <div id="ai-health-score" class="mb-2"></div>
+              <div id="ai-tips"></div>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+        $('input[type="date"]').val(new Date().toISOString().split('T')[0]);
+    });
+    
+    function setBudget(categoryId, categoryName) {
+        const amount = prompt(`Set monthly budget for ${categoryName}:`, '0.00');
+        if (amount !== null && !isNaN(amount) && parseFloat(amount) >= 0) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Home/SetMonthlyBudget';
+            
+            const categoryIdField = document.createElement('input');
+            categoryIdField.type = 'hidden';
+            categoryIdField.name = 'categoryId';
+            categoryIdField.value = categoryId;
+            
+            const monthYearField = document.createElement('input');
+            monthYearField.type = 'hidden';
+            monthYearField.name = 'monthYear';
+            monthYearField.value = '@ViewBag.CurrentMonth';
+            
+            const amountField = document.createElement('input');
+            amountField.type = 'hidden';
+            amountField.name = 'amount';
+            amountField.value = amount;
+            
+            form.appendChild(categoryIdField);
+            form.appendChild(monthYearField);
+            form.appendChild(amountField);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+    
+    function deleteCategory(categoryId, categoryName) {
+        if (confirm(`Are you sure you want to delete the "${categoryName}" envelope? This action cannot be undone.`)) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Home/DeleteCategory';
+            
+            const categoryIdField = document.createElement('input');
+            categoryIdField.type = 'hidden';
+            categoryIdField.name = 'id';
+            categoryIdField.value = categoryId;
+            
+            form.appendChild(categoryIdField);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // AI Recommendations Function
+    async function getAIRecommendations() {
+        const button = document.querySelector('button[onclick="getAIRecommendations()"]');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing...';
+        button.disabled = true;
+
+        try {
+            const response = await fetch('/AIAdvisor/GetBudgetRecommendations?month=@ViewBag.CurrentMonth');
+            const recommendations = await response.json();
+            
+            displayAIRecommendations(recommendations);
+        } catch (error) {
+            console.error('Error fetching AI recommendations:', error);
+            alert('Unable to get AI recommendations at this time. Please check your API configuration.');
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    function displayAIRecommendations(recommendations) {
+        const container = document.getElementById('ai-recommendations');
+        const mainAdvice = document.getElementById('ai-main-advice');
+        const healthScore = document.getElementById('ai-health-score');
+        const tips = document.getElementById('ai-tips');
+
+        mainAdvice.innerHTML = `<strong>Main Advice:</strong> ${recommendations.mainAdvice}`;
+        healthScore.innerHTML = `<span class="badge bg-primary">Budget Health: ${recommendations.overallHealthScore}</span>`;
+        
+        let tipsHtml = '<strong>Smart Tips:</strong><ul class="list-unstyled mt-1">';
+        recommendations.tips.forEach(tip => {
+            tipsHtml += `<li><i class="bi bi-check-circle text-success"></i> ${tip}</li>`;
+        });
+        tipsHtml += '</ul>';
+        tips.innerHTML = tipsHtml;
+
+        container.style.display = 'block';
+    }
+
+    // Monthly Income Setting Function
+    function setMonthlyIncome() {
+        const currentIncome = @(ViewBag.MonthlyIncome ?? 0);
+        const amount = prompt('Set monthly income:', currentIncome.toString());
+        if (amount !== null && !isNaN(amount) && parseFloat(amount) >= 0) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/Home/SetMonthlyIncome';
+            
+            const monthYearField = document.createElement('input');
+            monthYearField.type = 'hidden';
+            monthYearField.name = 'monthYear';
+            monthYearField.value = '@ViewBag.CurrentMonth';
+            
+            const amountField = document.createElement('input');
+            amountField.type = 'hidden';
+            amountField.name = 'amount';
+            amountField.value = amount;
+            
+            form.appendChild(monthYearField);
+            form.appendChild(amountField);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // Category Filtering Function
+    function filterCategories(filter) {
+        const rows = document.querySelectorAll('.category-row');
+        const tabs = document.querySelectorAll('.nav-link');
+        
+        // Remove active class from all tabs
+        tabs.forEach(tab => tab.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        document.getElementById('tab-' + filter).classList.add('active');
+        
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            let show = false;
+            
+            switch (filter) {
+                case 'all':
+                    show = true;
+                    break;
+                case 'underfunded':
+                    show = status === 'underfunded' || status === 'unfunded';
+                    break;
+                case 'overfunded':
+                    show = status === 'overfunded';
+                    break;
+            }
+            
+            row.style.display = show ? 'table-row' : 'none';
+        });
+    }
+
+    // Initialize with "All" tab active
+    $(document).ready(function() {
+        document.getElementById('tab-all').classList.add('active');
+    });
+
+    // New Creative AI Functions
+    async function getPersonalCoach() {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Consulting Coach...';
+        button.disabled = true;
+
+        try {
+            const response = await fetch('/AIAdvisor/GetPersonalizedCoaching');
+            const coaching = await response.json();
+            
+            displayPersonalCoaching(coaching);
+        } catch (error) {
+            console.error('Error getting personal coaching:', error);
+            alert('Unable to get personal coaching at this time. Please check your connection.');
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    function displayPersonalCoaching(coaching) {
+        const coachingHtml = `
+            <div class="dd-callout mt-3">
+                <div class="dd-callout-title">Coach · ${coaching.coachPersonality || 'Tips'}</div>
+                <p class="mb-2"><strong>${coaching.mainMessage}</strong></p>
+                ${coaching.personalizedTips.length > 0 ? `
+                    <ul class="dd-callout-list">
+                        ${coaching.personalizedTips.slice(0, 3).map(tip =>
+                            `<li><strong>${tip.title}:</strong> ${tip.advice}</li>`
+                        ).join('')}
+                    </ul>
+                ` : ''}
+                ${coaching.actionItems.length > 0 ? `
+                    <p class="mb-1 small text-muted">Next (~${coaching.actionItems[0].estimatedMinutes} min)</p>
+                    <p class="mb-2">${coaching.actionItems[0].task}</p>
+                ` : ''}
+                ${coaching.motivationalQuote ? `<p class="mb-0 small text-muted"><em>${coaching.motivationalQuote}</em></p>` : ''}
+            </div>
+        `;
+        
+        // Remove existing coaching display
+        const existing = document.getElementById('personal-coaching-display');
+        if (existing) existing.remove();
+        
+        // Add new coaching display
+        const coachingDiv = document.createElement('div');
+        coachingDiv.id = 'personal-coaching-display';
+        coachingDiv.innerHTML = coachingHtml;
+        
+        const aiSection = document.querySelector('.ai-advisor-card');
+        aiSection.appendChild(coachingDiv);
+    }
+
+    async function categorizeTransactions() {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-hourglass-split"></i> Analyzing Transactions...';
+        button.disabled = true;
+
+        try {
+            // For demo purposes, create some sample pending transactions
+            const sampleTransactions = [
+                { description: 'WALMART SUPERCENTER', merchant: 'Walmart', amount: 87.43, date: new Date() },
+                { description: 'SHELL GAS STATION', merchant: 'Shell', amount: 42.18, date: new Date() },
+                { description: 'AMAZON.COM', merchant: 'Amazon', amount: 29.99, date: new Date() }
+            ];
+
+            const response = await fetch('/AIAdvisor/CategorizePendingTransactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pendingTransactions: sampleTransactions })
+            });
+            
+            const categorization = await response.json();
+            displayCategorizationResults(categorization);
+        } catch (error) {
+            console.error('Error categorizing transactions:', error);
+            alert('Unable to categorize transactions at this time. Please check your connection.');
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    function displayCategorizationResults(categorization) {
+        const categorizationHtml = `
+            <div class="dd-callout mt-3">
+                <div class="card-header">
+                    <strong>🏷️ Smart Transaction Categorization</strong>
+                    <span class="badge bg-primary float-end">Confidence: ${Math.round(categorization.confidenceScore)}%</span>
+                </div>
+                <div class="card-body">
+                    ${categorization.categorizedTransactions.length > 0 ? `
+                        <div class="mb-3">
+                            <strong>📊 Suggested Categories:</strong>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Transaction</th>
+                                            <th>Suggested Category</th>
+                                            <th>Confidence</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${categorization.categorizedTransactions.map(ct => `
+                                            <tr>
+                                                <td><small>${ct.description}</small></td>
+                                                <td><span class="badge bg-info">${ct.suggestedCategory}</span></td>
+                                                <td>${Math.round(ct.confidence)}%</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${categorization.learningTips.length > 0 ? `
+                        <div>
+                            <strong>💡 Learning Tips:</strong>
+                            <ul class="list-unstyled">
+                                ${categorization.learningTips.map(tip => 
+                                    `<li><i class="bi bi-lightbulb text-warning"></i> ${tip}</li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        // Remove existing categorization display
+        const existing = document.getElementById('categorization-display');
+        if (existing) existing.remove();
+        
+        // Add new categorization display
+        const categorizationDiv = document.createElement('div');
+        categorizationDiv.id = 'categorization-display';
+        categorizationDiv.innerHTML = categorizationHtml;
+        
+        const aiSection = document.querySelector('.ai-advisor-card');
+        aiSection.appendChild(categorizationDiv);
+    }
+  </script>

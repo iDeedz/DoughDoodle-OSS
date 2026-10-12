@@ -1,0 +1,33 @@
+@{
+  ViewData["Title"] = "Financial calendar";
+  var y = (int)ViewBag.Year; var m = (int)ViewBag.Month;
+  var bills = (IEnumerable<DoughDoodle.Models.Bill>)ViewBag.Bills;
+  var goals = (IEnumerable<DoughDoodle.Models.FinancialGoal>)ViewBag.Goals;
+  var recurring = (IEnumerable<DoughDoodle.Models.ScheduledTransaction>)ViewBag.Recurring;
+  var start = new DateTime(y, m, 1);
+  var days = DateTime.DaysInMonth(y, m);
+  var pad = (int)start.DayOfWeek;
+}
+<h2><i class="bi bi-calendar3"></i> Financial calendar — @start.ToString("MMMM yyyy")</h2>
+<div class="d-flex gap-2 mb-3">
+  <a class="btn btn-outline-secondary btn-sm" asp-action="Index" asp-route-year="@(m==1?y-1:y)" asp-route-month="@(m==1?12:m-1)">Prev</a>
+  <a class="btn btn-outline-secondary btn-sm" asp-action="Index" asp-route-year="@(m==12?y+1:y)" asp-route-month="@(m==12?1:m+1)">Next</a>
+</div>
+<div class="dd-cal-grid">
+@for (var i = 0; i < pad; i++) { <div class="dd-cal-cell border bg-light" style="min-height:90px"></div> }
+@for (var d = 1; d <= days; d++) {
+  var day = new DateTime(y, m, d);
+  <div class="dd-cal-cell border p-1" style="min-height:90px">
+    <div class="fw-bold small">@d</div>
+    @foreach (var b in bills.Where(x => x.DueDate.Date == day.Date)) {
+      <span class="badge bg-warning text-dark d-block mb-1">Bill: @b.Name</span>
+    }
+    @foreach (var g in goals.Where(x => x.TargetDate?.Date == day.Date)) {
+      <span class="badge bg-success d-block mb-1">Goal: @g.Name</span>
+    }
+    @foreach (var r in recurring.Where(x => x.NextDueDate.Date == day.Date)) {
+      <span class="badge bg-info text-dark d-block mb-1">Recurring</span>
+    }
+  </div>
+}
+</div>

@@ -1,0 +1,85 @@
+@model List<DoughDoodle.Models.ScheduledTransaction>
+@{
+    ViewData["Title"] = "Subscription Hunter";
+    var monthly = (decimal)(ViewBag.MonthlyBurn ?? 0m);
+    var annual = (decimal)(ViewBag.AnnualBurn ?? 0m);
+}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1><i class="bi bi-radar"></i> Subscription hunter</h1>
+            <p class="text-muted mb-0">Find dough leaking to recurring memberships — cancel, trim, or keep with intent.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">All recurring</a>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="dd-metric-tile dd-metric-danger">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Est. monthly burn</div>
+                        <div class="dd-metric-value">@CurrencyDisplay.Format(monthly, ViewData["PreferredCurrency"] as string)</div>
+                        <div class="dd-metric-meta">Active suspects</div>
+                    </div>
+                    <div class="dd-metric-icon coral"><i class="bi bi-fire"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Est. yearly</div>
+                        <div class="dd-metric-value">@CurrencyDisplay.Format(annual, ViewData["PreferredCurrency"] as string, compact: true)</div>
+                        <div class="dd-metric-meta">Twelve times monthly</div>
+                    </div>
+                    <div class="dd-metric-icon gold"><i class="bi bi-calendar3"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Suspects found</div>
+                        <div class="dd-metric-value">@Model.Count</div>
+                        <div class="dd-metric-meta">Pause or edit each row</div>
+                    </div>
+                    <div class="dd-metric-icon teal"><i class="bi bi-radar"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0 align-middle">
+                <thead><tr><th>Name</th><th>Envelope</th><th>Cadence</th><th class="text-end">Amount</th><th>Next due</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">No subscription-like schedules yet. Add recurring bills, then hunt.</td></tr>
+                }
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td>@s.Description</td>
+                        <td>@(s.Category?.Name ?? "—")</td>
+                        <td>@s.RecurrenceType</td>
+                        <td class="text-end">@CurrencyDisplay.Format(s.Amount, ViewData["PreferredCurrency"] as string)</td>
+                        <td>@s.NextDueDate.ToString("d MMM yyyy")</td>
+                        <td class="text-end text-nowrap">
+                            <a asp-action="Edit" asp-route-id="@s.Id" class="btn btn-outline-primary btn-sm">Edit</a>
+                            <form asp-action="ToggleActive" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@s.Id" />
+                                <input type="hidden" name="returnAction" value="SubscriptionHunter" />
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Pause</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

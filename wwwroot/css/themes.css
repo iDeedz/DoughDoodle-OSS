@@ -1,0 +1,267 @@
+/* DoughDoodle theme overlays — fintech-aligned tokens */
+
+/* Default (cool money) */
+[data-theme="default"] {
+  --primary-color: #0D9488;
+  --primary-dark: #0F766E;
+  --primary-light: #14B8A6;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-muted: #f1f5f9;
+  --bg-app: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  --border-medium: #cbd5e1;
+}
+
+[data-theme="ocean"] {
+  --primary-color: #0284c7;
+  --primary-dark: #0369a1;
+  --primary-light: #0ea5e9;
+  --secondary-color: #0369a1;
+  --secondary-dark: #075985;
+  --secondary-light: #0284c7;
+  --accent-success: #059669;
+  --accent-warning: #d97706;
+  --accent-danger: #dc2626;
+  --accent-info: #2563eb;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f0f9ff;
+  --bg-muted: #e0f2fe;
+  --bg-app: #f0f9ff;
+  --text-primary: #0c4a6e;
+  --text-secondary: #075985;
+  --text-muted: #0369a1;
+  --border-light: #bae6fd;
+  --border-medium: #7dd3fc;
+  --dd-mint: #0284c7;
+  --dd-mint-dark: #0369a1;
+  --dd-hero-grad: linear-gradient(135deg, #0c4a6e 0%, #0369a1 45%, #0ea5e9 100%);
+}
+
+[data-theme="forest"] {
+  --primary-color: #059669;
+  --primary-dark: #047857;
+  --primary-light: #10b981;
+  --secondary-color: #065f46;
+  --secondary-dark: #064e3b;
+  --secondary-light: #047857;
+  --accent-success: #10b981;
+  --accent-warning: #f59e0b;
+  --accent-danger: #ef4444;
+  --accent-info: #06b6d4;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f0fdf4;
+  --bg-muted: #dcfce7;
+  --bg-app: #f0fdf4;
+  --text-primary: #064e3b;
+  --text-secondary: #065f46;
+  --text-muted: #047857;
+  --border-light: #bbf7d0;
+  --border-medium: #86efac;
+  --dd-mint: #059669;
+  --dd-mint-dark: #047857;
+  --dd-hero-grad: linear-gradient(135deg, #064e3b 0%, #047857 45%, #10b981 100%);
+}
+
+[data-theme="sunset"] {
+  --primary-color: #ea580c;
+  --primary-dark: #c2410c;
+  --primary-light: #f97316;
+  --secondary-color: #9a3412;
+  --secondary-dark: #7c2d12;
+  --secondary-light: #c2410c;
+  --accent-success: #16a34a;
+  --accent-warning: #eab308;
+  --accent-danger: #dc2626;
+  --accent-info: #0284c7;
+  --bg-primary: #fffbeb;
+  --bg-secondary: #fff7ed;
+  --bg-muted: #ffedd5;
+  --bg-app: #fff7ed;
+  --text-primary: #7c2d12;
+  --text-secondary: #9a3412;
+  --text-muted: #c2410c;
+  --border-light: #fed7aa;
+  --border-medium: #fdba74;
+  --dd-mint: #ea580c;
+  --dd-mint-dark: #c2410c;
+  --dd-hero-grad: linear-gradient(135deg, #7c2d12 0%, #c2410c 45%, #f97316 100%);
+}
+
+[data-theme="purple"] {
+  --primary-color: #7c3aed;
+  --primary-dark: #6d28d9;
+  --primary-light: #8b5cf6;
+  --secondary-color: #6b21a8;
+  --secondary-dark: #581c87;
+  --secondary-light: #7e22ce;
+  --accent-success: #059669;
+  --accent-warning: #d97706;
+  --accent-danger: #dc2626;
+  --accent-info: #0284c7;
+  --bg-primary: #faf5ff;
+  --bg-secondary: #f5f3ff;
+  --bg-muted: #ede9fe;
+  --bg-app: #f5f3ff;
+  --text-primary: #4c1d95;
+  --text-secondary: #5b21b6;
+  --text-muted: #6d28d9;
+  --border-light: #ddd6fe;
+  --border-medium: #c4b5fd;
+  --dd-mint: #7c3aed;
+  --dd-mint-dark: #6d28d9;
+  --dd-hero-grad: linear-gradient(135deg, #4c1d95 0%, #6d28d9 45%, #8b5cf6 100%);
+}
+
+[data-theme="dark"] {
+  --primary-color: #2dd4bf;
+  --primary-dark: #14b8a6;
+  --primary-light: #5eead4;
+  --secondary-color: #64748b;
+  --secondary-dark: #475569;
+  --secondary-light: #94a3b8;
+  --accent-success: #34d399;
+  --accent-warning: #fbbf24;
+  --accent-danger: #fb7185;
+  --accent-info: #38bdf8;
+  --neutral-50: #0f172a;
+  --neutral-100: #1e293b;
+  --neutral-200: #334155;
+  --neutral-300: #475569;
+  --neutral-400: #64748b;
+  --neutral-500: #94a3b8;
+  --neutral-600: #cbd5e1;
+  --neutral-700: #e2e8f0;
+  --neutral-800: #f1f5f9;
+  --neutral-900: #f8fafc;
+  /* Kit dark: navy #0B1220 elevated surfaces */
+  --bg-primary: #121a2b;
+  --bg-secondary: #1a2438;
+  --bg-muted: #1a2438;
+  --bg-app: #0B1220;
+  --text-primary: #e8eef8;
+  --text-secondary: #a8b3c7;
+  --text-muted: #6b7a94;
+  --border-light: #1e2a40;
+  --border-medium: #2a3a55;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --dd-mint: #2dd4bf;
+  --dd-mint-dark: #14b8a6;
+  --dd-navy: #e8eef8;
+  --dd-charcoal: #a8b3c7;
+  --dd-cream: #1a2438;
+  --dd-focus-ring: 0 0 0 3px rgba(45, 212, 191, 0.35);
+  --dd-hero-grad: linear-gradient(135deg, #0B1220 0%, #0F766E 50%, #2dd4bf 100%);
+}
+
+[data-theme="high-contrast"] {
+  --primary-color: #000000;
+  --primary-dark: #000000;
+  --primary-light: #1a1a1a;
+  --secondary-color: #333333;
+  --secondary-dark: #1a1a1a;
+  --secondary-light: #4d4d4d;
+  --accent-success: #008000;
+  --accent-warning: #ff8c00;
+  --accent-danger: #cc0000;
+  --accent-info: #0066cc;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-muted: #e0e0e0;
+  --bg-app: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #1a1a1a;
+  --text-muted: #333333;
+  --border-light: #000000;
+  --border-medium: #000000;
+  --dd-mint: #000000;
+  --dd-mint-dark: #000000;
+}
+
+a, button, .btn, .card, .nav-link, .form-control, .form-select, .dropdown-item {
+  transition-property: background-color, color, border-color, box-shadow, transform;
+  transition-duration: 0.18s;
+  transition-timing-function: ease;
+}
+
+.preload * { transition: none !important; }
+
+body {
+  background-color: var(--bg-app, var(--bg-primary));
+  color: var(--text-primary);
+}
+
+.card {
+  background-color: var(--bg-primary);
+  border-color: var(--border-light);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.text-muted { color: var(--text-muted) !important; }
+.bg-light { background-color: var(--bg-secondary) !important; }
+.border-light { border-color: var(--border-light) !important; }
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark theme polish */
+[data-theme="dark"] .card .card-text,
+[data-theme="dark"] .card h4,
+[data-theme="dark"] .card h5,
+[data-theme="dark"] .card p,
+[data-theme="dark"] .dd-metric-value,
+[data-theme="dark"] .dd-page-header h1 {
+  color: var(--text-primary) !important;
+}
+[data-theme="dark"] .navbar.dd-navbar,
+[data-theme="dark"] .dd-navbar {
+  background: rgba(15, 23, 42, 0.94) !important;
+  border-bottom-color: #334155 !important;
+}
+[data-theme="dark"] .dd-icon-btn,
+[data-theme="dark"] .dd-user-chip,
+[data-theme="dark"] .dd-nav-search .form-control,
+[data-theme="dark"] .dd-tier-chip,
+[data-theme="dark"] .dd-metric-tile,
+[data-theme="dark"] .dd-health-card,
+[data-theme="dark"] .dd-feature-card,
+[data-theme="dark"] .dd-empty {
+  background: var(--bg-secondary);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+[data-theme="dark"] .dd-health-ring {
+  background:
+    radial-gradient(circle at center, var(--bg-secondary) 58%, transparent 59%),
+    conic-gradient(var(--dd-health-color, var(--dd-mint)) calc(var(--dd-health) * 1%), #334155 0);
+}

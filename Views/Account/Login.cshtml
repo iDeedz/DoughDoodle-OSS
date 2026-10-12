@@ -1,0 +1,78 @@
+@model DoughDoodle.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Sign in";
+    ViewData["FullBleed"] = true;
+}
+
+<div class="dd-auth-shell">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="dd-auth-card dd-fade-up">
+                    <div class="dd-auth-top">
+                        <img src="~/images/branding/logo-mark.svg" asp-append-version="true" alt="DoughDoodle" />
+                        <h1 class="h3 mb-1 text-white">Welcome back</h1>
+                        <p class="mb-0 opacity-75">Sign in to your envelopes</p>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Login" method="post">
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="you@email.com" autocomplete="username" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input asp-for="Password" class="form-control" placeholder="Your password" autocomplete="current-password" />
+                                </div>
+                                <span asp-validation-for="Password" class="text-danger"></span>
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input asp-for="RememberMe" class="form-check-input" />
+                                <label asp-for="RememberMe" class="form-check-label">Keep me signed in</label>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-box-arrow-in-right"></i> Sign in
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <p class="mb-0">
+                            New here?
+                            <a asp-action="Register" class="fw-semibold text-decoration-none">Create a free account</a>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="dd-demo-pill mt-3 dd-fade-up">
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-key-fill mt-1" style="color: var(--dd-teal);"></i>
+                        <div>
+                            <strong>Try the demo</strong>
+                            <div class="small mt-1">
+                                Email: <code>demo&#64;doughdoodle.com</code><br />
+                                Password: <code>Demo123!</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

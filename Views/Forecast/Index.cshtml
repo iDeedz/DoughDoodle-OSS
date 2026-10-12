@@ -1,0 +1,35 @@
+@model IReadOnlyList<DoughDoodle.Services.Analytics.CashflowPoint>
+@{ ViewData["Title"] = "Cashflow forecast"; }
+<h2><i class="bi bi-graph-up"></i> Cashflow forecast</h2>
+<p class="text-muted">History plus simple average-based projection (not ML).</p>
+<canvas id="cfChart" height="120"></canvas>
+<table class="table table-striped mt-3">
+  <thead><tr><th>Month</th><th>Income</th><th>Expense</th><th>Net</th><th>Balance</th></tr></thead>
+  <tbody>
+  @foreach (var p in Model) {
+    <tr>
+      <td>@p.Month.ToString("yyyy-MM")</td>
+      <td>@CurrencyDisplay.Format(p.Income, ViewData["PreferredCurrency"] as string)</td>
+      <td>@CurrencyDisplay.Format(p.Expense, ViewData["PreferredCurrency"] as string)</td>
+      <td>@CurrencyDisplay.Format(p.Net, ViewData["PreferredCurrency"] as string)</td>
+      <td>@CurrencyDisplay.Format(p.ProjectedBalance, ViewData["PreferredCurrency"] as string)</td>
+    </tr>
+  }
+  </tbody>
+</table>
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(m => m.Month.ToString("yyyy-MM"))));
+const nets = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(m => m.Net)));
+const bals = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(m => m.ProjectedBalance)));
+new Chart(document.getElementById('cfChart'), {
+  type: 'line',
+  data: { labels, datasets: [
+    { label: 'Net', data: nets, borderColor: '#0D9488', tension: .2 },
+    { label: 'Projected balance', data: bals, borderColor: '#EAB308', tension: .2 }
+  ]},
+  options: { responsive: true }
+});
+</script>
+}

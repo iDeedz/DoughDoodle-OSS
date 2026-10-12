@@ -1,0 +1,170 @@
+@{
+    ViewData["Title"] = "Cover Overspending";
+    var monthYear = ViewBag.MonthYear as string ?? DateTime.Now.ToString("yyyy-MM");
+    var overspentCategories = (ViewBag.OverspentCategories as List<DoughDoodle.Models.Category>) ?? new List<DoughDoodle.Models.Category>();
+    var categoriesWithSurplus = (ViewBag.CategoriesWithSurplus as List<DoughDoodle.Models.Category>) ?? new List<DoughDoodle.Models.Category>();
+    var monthLabel = DateTime.ParseExact(monthYear + "-01", "yyyy-MM-dd", null).ToString("MMMM yyyy");
+
+    decimal GetOverspendAmount(DoughDoodle.Models.Category c)
+    {
+        var budget = c.Budgets.FirstOrDefault()?.Amount ?? 0;
+        var spent = c.Transactions.Sum(t => t.Amount);
+        return Math.Abs(Math.Min(0, budget + spent));
+    }
+
+    decimal GetAvailable(DoughDoodle.Models.Category c)
+    {
+        var budget = c.Budgets.FirstOrDefault()?.Amount ?? 0;
+        var spent = c.Transactions.Sum(t => t.Amount);
+        return Math.Max(0, budget + spent);
+    }
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-shield-exclamation"></i> Cover Overspending — @monthLabel</h4>
+                </div>
+                <div class="card-body">
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!overspentCategories.Any())
+                    {
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> Great news — no categories are overspent this month!
+                        </div>
+                    }
+                    else if (!categoriesWithSurplus.Any())
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> You have overspent categories but no categories with surplus to cover them. Consider adjusting budgets or transferring funds from accounts.
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-action="CoverOverspend" method="post">
+                            <input type="hidden" name="monthYear" value="@monthYear" />
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="overspentCategoryId" class="form-label">Overspent Category *</label>
+                                        <select name="overspentCategoryId" id="overspentCategoryId" class="form-select" required>
+                                            <option value="">Select overspent category</option>
+                                            @foreach (var category in overspentCategories)
+                                            {
+                                                var overspend = GetOverspendAmount(category);
+                                                <option value="@category.Id" data-overspend="@overspend">@category.Name — @CurrencyDisplay.Format(overspend, ViewData["PreferredCurrency"] as string) over</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="coveringCategoryId" class="form-label">Cover From Category *</label>
+                                        <select name="coveringCategoryId" id="coveringCategoryId" class="form-select" required>
+                                            <option value="">Select category with surplus</option>
+                                            @foreach (var category in categoriesWithSurplus)
+                                            {
+                                                var available = GetAvailable(category);
+                                                <option value="@category.Id" data-available="@available">@category.Name — @CurrencyDisplay.Format(available, ViewData["PreferredCurrency"] as string) available</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount to Cover *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                                    <input name="amount" id="amount" type="number" step="0.01" min="0.01" class="form-control" placeholder="0.00" required />
+                                </div>
+                                <div class="form-text" id="coverHint"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="MonthlyWorkflow" asp-route-monthYear="@monthYear" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Budget
+                                </a>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-shield-check"></i> Cover Overspend
+                                </button>
+                            </div>
+                        </form>
+                    }
+
+                    @if (overspentCategories.Any())
+                    {
+                        <hr class="my-4" />
+                        <h6><i class="bi bi-exclamation-circle text-danger"></i> Overspent Categories</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th class="text-end">Overspent By</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var category in overspentCategories.OrderByDescending(GetOverspendAmount))
+                                    {
+                                        <tr>
+                                            <td>@category.Name</td>
+                                            <td class="text-end text-danger">@CurrencyDisplay.Format(GetOverspendAmount(category), ViewData["PreferredCurrency"] as string)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)));
+document.addEventListener('DOMContentLoaded', function() {
+    const overspentSelect = document.getElementById('overspentCategoryId');
+    const coveringSelect = document.getElementById('coveringCategoryId');
+    const amountInput = document.getElementById('amount');
+    const hint = document.getElementById('coverHint');
+    if (!hint) return;
+
+    function updateHint() {
+        const overspent = overspentSelect?.options[overspentSelect.selectedIndex]?.dataset?.overspend;
+        const available = coveringSelect?.options[coveringSelect.selectedIndex]?.dataset?.available;
+        const parts = [];
+        if (overspent) parts.push('Overspent: ' + currencySymbol + parseFloat(overspent).toFixed(2));
+        if (available) parts.push('Available to cover: ' + currencySymbol + parseFloat(available).toFixed(2));
+        hint.textContent = parts.join(' · ');
+    }
+
+    overspentSelect?.addEventListener('change', function() {
+        const overspend = this.options[this.selectedIndex]?.dataset?.overspend;
+        if (overspend && amountInput) amountInput.value = parseFloat(overspend).toFixed(2);
+        updateHint();
+    });
+    coveringSelect?.addEventListener('change', updateHint);
+    updateHint();
+});
+</script>
+}

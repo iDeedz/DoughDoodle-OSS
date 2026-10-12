@@ -1,0 +1,242 @@
+@{
+    ViewData["Title"] = "AI Debt Manager";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <h2><i class="bi bi-credit-card"></i> AI Debt Payoff Planner</h2>
+            <p class="text-muted">Get personalized recommendations for paying off your debts faster with AI-powered strategies.</p>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>💰 Extra Money Available</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>How much extra money do you have to put toward debt each month?</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                            <input type="number" id="extraMoney" class="form-control" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>📋 Your Debts</h5>
+                    <button class="btn btn-success btn-sm" onclick="addDebt()">
+                        <i class="bi bi-plus-circle"></i> Add Debt
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="debts-container">
+                        <p class="text-muted">Click "Add Debt" to start entering your debt information.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary btn-lg" onclick="getDebtPayoffPlan()">
+                    <i class="bi bi-robot"></i> Get AI Debt Payoff Plan
+                </button>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💡 Debt Payoff Strategies</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>🏔️ Debt Avalanche</h6>
+                        <small class="text-muted">Pay minimums on all debts, put extra money toward highest interest rate debt. Saves the most money on interest.</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6>❄️ Debt Snowball</h6>
+                        <small class="text-muted">Pay minimums on all debts, put extra money toward smallest balance. Provides psychological wins.</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6>🎯 Hybrid Approach</h6>
+                        <small class="text-muted">Combines elements of both strategies based on your specific situation.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Recommendations will appear here -->
+            <div id="ai-debt-recommendations" style="display:none;" class="mt-4">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <strong>🤖 AI Recommendations</strong>
+                    </div>
+                    <div class="card-body" id="debt-recommendations-content">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)));
+let debtCount = 0;
+
+function addDebt() {
+    debtCount++;
+    const container = document.getElementById('debts-container');
+    
+    if (debtCount === 1) {
+        container.innerHTML = '';
+    }
+    
+    const debtHtml = `
+        <div class="debt-item border p-3 mb-3 rounded" data-debt-id="${debtCount}">
+            <div class="d-flex justify-content-between align-items-start">
+                <h6>Debt #${debtCount}</h6>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDebt(${debtCount})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-2">
+                        <label class="form-label">Debt Name</label>
+                        <input type="text" class="form-control debt-name" placeholder="e.g., Credit Card, Student Loan">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-2">
+                        <label class="form-label">Current Balance</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                            <input type="number" class="form-control debt-balance" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-2">
+                        <label class="form-label">Interest Rate (%)</label>
+                        <input type="number" class="form-control debt-rate" placeholder="0.00" step="0.01">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-2">
+                        <label class="form-label">Minimum Payment</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                            <input type="number" class="form-control debt-minimum" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', debtHtml);
+}
+
+function removeDebt(debtId) {
+    const debtItem = document.querySelector(`[data-debt-id="${debtId}"]`);
+    if (debtItem) {
+        debtItem.remove();
+    }
+    
+    const remainingDebts = document.querySelectorAll('.debt-item');
+    if (remainingDebts.length === 0) {
+        document.getElementById('debts-container').innerHTML = '<p class="text-muted">Click "Add Debt" to start entering your debt information.</p>';
+        debtCount = 0;
+    }
+}
+
+async function getDebtPayoffPlan() {
+    const extraMoney = parseFloat(document.getElementById('extraMoney').value) || 0;
+    const debtItems = document.querySelectorAll('.debt-item');
+    
+    if (debtItems.length === 0) {
+        alert('Please add at least one debt to get recommendations.');
+        return;
+    }
+    
+    const debts = [];
+    debtItems.forEach(item => {
+        const name = item.querySelector('.debt-name').value;
+        const balance = parseFloat(item.querySelector('.debt-balance').value) || 0;
+        const rate = parseFloat(item.querySelector('.debt-rate').value) || 0;
+        const minimum = parseFloat(item.querySelector('.debt-minimum').value) || 0;
+        
+        if (name && balance > 0) {
+            debts.push({
+                name: name,
+                balance: balance,
+                interestRate: rate,
+                minimumPayment: minimum
+            });
+        }
+    });
+    
+    if (debts.length === 0) {
+        alert('Please fill out all debt information completely.');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/AIAdvisor/GetDebtPayoffAdvice', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                extraMoney: extraMoney,
+                debts: debts
+            })
+        });
+        
+        const recommendation = await response.json();
+        displayDebtRecommendations(recommendation);
+    } catch (error) {
+        console.error('Error getting debt recommendations:', error);
+        alert('Unable to get debt recommendations at this time. Please check your API configuration.');
+    }
+}
+
+function displayDebtRecommendations(recommendation) {
+    const container = document.getElementById('ai-debt-recommendations');
+    const content = document.getElementById('debt-recommendations-content');
+    
+    let html = `
+        <div class="mb-3">
+            <h6>🎯 Recommended Strategy</h6>
+            <p class="small">${recommendation.strategy}</p>
+        </div>
+        
+        <div class="mb-3">
+            <h6>⏰ Estimated Payoff Time</h6>
+            <p class="small">${recommendation.estimatedPayoffTime}</p>
+        </div>
+    `;
+    
+    if (recommendation.paymentPlans && recommendation.paymentPlans.length > 0) {
+        html += `
+            <div class="mb-3">
+                <h6>💳 Payment Plan</h6>
+                <ul class="list-unstyled small">
+        `;
+        
+        recommendation.paymentPlans.forEach(plan => {
+            html += `
+                <li class="mb-1">
+                    <strong>${plan.debtName}:</strong> ${currencySymbol}${plan.suggestedPayment.toFixed(2)}
+                    <br><small class="text-muted">${plan.reasoning}</small>
+                </li>
+            `;
+        });
+        
+        html += '</ul></div>';
+    }
+    
+    content.innerHTML = html;
+    container.style.display = 'block';
+}
+</script>

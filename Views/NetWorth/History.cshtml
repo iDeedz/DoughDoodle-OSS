@@ -1,0 +1,153 @@
+@model IEnumerable<DoughDoodle.Models.NetWorthHistory>
+@{
+    ViewData["Title"] = "Value History";
+    var item = ViewBag.NetWorthItem as DoughDoodle.Models.NetWorthItem;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-clock-history"></i> Value History</h2>
+                <div>
+                    @if (item != null)
+                    {
+                        <a href="@Url.Action("Edit", new { id = item.Id })" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil-square"></i> Edit Item
+                        </a>
+                    }
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Net Worth
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (item != null)
+    {
+        <div class="row mb-4">
+            <div class="col-md-8 offset-md-2">
+                <div class="card @(item.IsAsset ? "border-success" : "border-danger")">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="mb-1">@item.Name</h5>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <p class="text-muted mb-1">@item.Description</p>
+                                }
+                                @if (item.IsAsset && item.AssetType.HasValue)
+                                {
+                                    <span class="badge bg-success">@item.AssetType</span>
+                                }
+                                else if (!item.IsAsset && item.LiabilityType.HasValue)
+                                {
+                                    <span class="badge bg-danger">@item.LiabilityType</span>
+                                }
+                                <span class="badge @(item.IsAsset ? "bg-success" : "bg-danger") ms-1">
+                                    @(item.IsAsset ? "Asset" : "Liability")
+                                </span>
+                            </div>
+                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                                <div class="fw-bold fs-4 @(item.IsAsset ? "text-success" : "text-danger")">
+                                    @CurrencyDisplay.Format(item.CurrentValue, ViewData["PreferredCurrency"] as string)
+                                </div>
+                                <small class="text-muted">Current value</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Value Changes (@Model.Count())</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Recorded Date</th>
+                                        <th>Value</th>
+                                        <th>Change</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var historyList = Model.ToList();
+                                    }
+                                    @for (var i = 0; i < historyList.Count; i++)
+                                    {
+                                        var entry = historyList[i];
+                                        decimal? change = i < historyList.Count - 1
+                                            ? entry.Value - historyList[i + 1].Value
+                                            : null;
+
+                                        <tr>
+                                            <td>@entry.RecordedAt.ToString("MMM dd, yyyy h:mm tt")</td>
+                                            <td class="fw-bold @(item?.IsAsset == true ? "text-success" : "text-danger")">
+                                                @CurrencyDisplay.Format(entry.Value, ViewData["PreferredCurrency"] as string)
+                                            </td>
+                                            <td>
+                                                @if (change.HasValue)
+                                                {
+                                                    if (change.Value > 0)
+                                                    {
+                                                        <span class="text-success">
+                                                            <i class="bi bi-arrow-up"></i> +@CurrencyDisplay.Format(change.Value, ViewData["PreferredCurrency"] as string)
+                                                        </span>
+                                                    }
+                                                    else if (change.Value < 0)
+                                                    {
+                                                        <span class="text-danger">
+                                                            <i class="bi bi-arrow-down"></i> @CurrencyDisplay.Format(change.Value, ViewData["PreferredCurrency"] as string)
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">No change</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(entry.Notes))
+                                                {
+                                                    <span class="text-muted">@entry.Notes</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">—</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-graph-up display-4 text-muted"></i>
+                            <h5 class="text-muted mt-3">No History Recorded</h5>
+                            <p class="text-muted">Value changes will appear here when the item is updated.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

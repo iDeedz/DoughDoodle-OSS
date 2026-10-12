@@ -1,0 +1,17 @@
+@model IReadOnlyList<DoughDoodle.Services.Analytics.GoalAnalyticsDto>
+@{ ViewData["Title"] = "Goal analytics"; }
+<h2><i class="bi bi-bullseye"></i> Advanced goal analytics</h2>
+<table class="table table-striped">
+<thead><tr><th>Goal</th><th>Progress</th><th>Remaining</th><th>Suggested / mo</th><th>Projected</th><th>Pace</th></tr></thead>
+<tbody>
+@foreach (var g in Model) {
+  <tr>
+    <td>@g.Name</td>
+    <td>@g.ProgressPct.ToString("0.#")%</td>
+    <td>@CurrencyDisplay.Format(g.Remaining, ViewData["PreferredCurrency"] as string)</td>
+    <td>@CurrencyDisplay.Format(g.SuggestedMonthly, ViewData["PreferredCurrency"] as string)</td>
+    <td>@(g.ProjectedCompletion?.ToString("yyyy-MM-dd") ?? "—")</td>
+    <td><span class="badge bg-secondary">@g.PaceStatus</span></td>
+  </tr>
+}
+</tbody></table>

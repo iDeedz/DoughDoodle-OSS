@@ -1,0 +1,367 @@
+@using DoughDoodle.Models.ViewModels
+@model SubUserDashboardViewModel
+@{
+    ViewData["Title"] = "Family Dashboard";
+    var cc = CurrencyDisplay.Normalize(ViewData["PreferredCurrency"] as string);
+    var curSym = CurrencyDisplay.Symbol(cc);
+}
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Enhanced Chart Animations -->
+<script src="~/js/enhanced-charts.js" asp-append-version="true"></script>
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="bi bi-people text-primary"></i> Family Financial Dashboard</h1>
+                    <p class="text-muted mb-0">Overview of all family member budgets and spending</p>
+                </div>
+                <div>
+                    <a asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-person"></i> My Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Family Overview Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-lg bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-people-fill fs-2"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted">Family Members</h6>
+                            <h2 class="mb-0">@Model.FamilyOverview.TotalFamilyMembers</h2>
+                            <small class="text-info">Active sub-accounts</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-lg bg-success text-white rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-wallet2 fs-2"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted">Total Family Budget</h6>
+                            <h2 class="mb-0">@CurrencyDisplay.Format(Model.FamilyOverview.TotalFamilyBudget, cc, compact: true)</h2>
+                            <small class="text-success">Combined budgets</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-lg @(Model.FamilyOverview.TotalFamilySpending > Model.FamilyOverview.TotalFamilyBudget ? "bg-danger" : "bg-warning") text-white rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-credit-card fs-2"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted">Total Spending</h6>
+                            <h2 class="mb-0">@CurrencyDisplay.Format(Model.FamilyOverview.TotalFamilySpending, cc, compact: true)</h2>
+                            <small class="@(Model.FamilyOverview.TotalFamilySpending > Model.FamilyOverview.TotalFamilyBudget ? "text-danger" : "text-warning")">
+                                Family expenses
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="avatar-lg @(Model.FamilyOverview.TotalFamilyRemaining >= 0 ? "bg-info" : "bg-danger") text-white rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-piggy-bank fs-2"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0 text-muted">Remaining Budget</h6>
+                            <h2 class="mb-0">@CurrencyDisplay.Format(Model.FamilyOverview.TotalFamilyRemaining, cc, compact: true)</h2>
+                            <small class="@(Model.FamilyOverview.TotalFamilyRemaining >= 0 ? "text-info" : "text-danger")">
+                                @(Model.FamilyOverview.TotalFamilyRemaining >= 0 ? "Available" : "Over budget")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Family Insights -->
+    @if (Model.FamilyOverview.FamilyInsights.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-bottom-0">
+                        <h5 class="mb-0"><i class="bi bi-lightbulb text-warning"></i> Family Financial Insights</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var insight in Model.FamilyOverview.FamilyInsights)
+                        {
+                            <div class="alert alert-info border-0 mb-2">
+                                <i class="bi bi-info-circle"></i> @insight
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.FamilyOverview.TopSpendingMember))
+                        {
+                            <div class="alert alert-warning border-0">
+                                <strong><i class="bi bi-trophy"></i> Top Spender:</strong>
+                                @Model.FamilyOverview.TopSpendingMember - @CurrencyDisplay.Format(Model.FamilyOverview.TopSpendingAmount, cc, compact: true)
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Charts and Family Member Details -->
+    <div class="row g-4 mb-4">
+        <!-- Family Spending Breakdown Chart -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom-0">
+                    <h5 class="mb-0"><i class="bi bi-pie-chart text-primary"></i> Family Spending Distribution</h5>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center">
+                    <canvas id="familySpendingChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Spending Categories -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-bottom-0">
+                    <h5 class="mb-0"><i class="bi bi-bar-chart text-success"></i> Family Member Comparison</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="memberComparisonChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Individual Family Member Details -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-bottom-0">
+                    <h5 class="mb-0"><i class="bi bi-people text-primary"></i> Family Member Details</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Family Member</th>
+                                    <th>Budget</th>
+                                    <th>Spent</th>
+                                    <th>Remaining</th>
+                                    <th>Categories</th>
+                                    <th>Last Activity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var member in Model.SubUserSummaries)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2">
+                                                    <i class="bi bi-person text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-medium">@member.User.FullName</div>
+                                                    <small class="text-muted">@member.User.Email</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium text-success">@CurrencyDisplay.Format(member.TotalBudget, cc, compact: true)</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium @(member.TotalSpent > member.TotalBudget ? "text-danger" : "text-primary")">
+                                                @CurrencyDisplay.Format(member.TotalSpent, cc, compact: true)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-medium @(member.Remaining >= 0 ? "text-success" : "text-danger")">
+                                                @CurrencyDisplay.Format(member.Remaining, cc, compact: true)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@member.CategoryCount categories</span>
+                                        </td>
+                                        <td>
+                                            @if (member.LastActivity != DateTime.MinValue)
+                                            {
+                                                <small class="text-muted">@member.LastActivity.ToString("MMM dd")</small>
+                                            }
+                                            else
+                                            {
+                                                <small class="text-muted">No activity</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge @(member.HealthStatus == "Good" ? "bg-success" : "bg-warning")">
+                                                @member.HealthStatus
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a asp-controller="Account" asp-action="ViewSubAccountBudget" asp-route-subAccountId="@member.User.Id"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> View Budget
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    @if (!Model.SubUserSummaries.Any())
+                    {
+                        <div class="text-center p-4">
+                            <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                            <h6 class="text-muted mt-2">No family members yet</h6>
+                            <p class="text-muted">Create sub-accounts to manage family budgets</p>
+                            <a asp-controller="Account" asp-action="CreateSubAccount" class="btn btn-primary">
+                                <i class="bi bi-person-plus"></i> Add Family Member
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-lg {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .avatar-sm {
+        width: 35px;
+        height: 35px;
+        font-size: 0.9rem;
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #495057;
+    }
+    
+    .alert {
+        border-radius: 8px;
+    }
+</style>
+
+<script>
+    // Family Spending Distribution Chart with Enhanced Animations
+    const familySpendingData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.FamilySpendingChart));
+    const familySpendingCtx = document.getElementById('familySpendingChart').getContext('2d');
+    createEnhancedDoughnutChart(familySpendingCtx, {
+        labels: familySpendingData.map(d => d.member),
+        datasets: [{
+            data: familySpendingData.map(d => d.amount),
+            backgroundColor: familySpendingData.map(d => d.color),
+            borderWidth: 3,
+            borderColor: '#fff'
+        }]
+    }, {
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const data = familySpendingData[context.dataIndex];
+                        const percentage = Math.round((data.amount / familySpendingData.reduce((sum, d) => sum + d.amount, 0)) * 100);
+                        return data.member + ': ' + curSym + data.amount.toLocaleString() + ' (' + percentage + '%)';
+                    }
+                }
+            }
+        }
+    });
+
+    // Member Comparison Chart with Enhanced Animations
+    const memberComparisonCtx = document.getElementById('memberComparisonChart').getContext('2d');
+    createEnhancedBarChart(memberComparisonCtx, {
+        labels: familySpendingData.map(d => d.member),
+        datasets: [{
+                label: 'Budget',
+                data: familySpendingData.map(d => d.budget),
+                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                borderColor: '#28a745',
+                borderWidth: 1
+            }, {
+                label: 'Spent',
+                data: familySpendingData.map(d => d.amount),
+                backgroundColor: familySpendingData.map(d => d.amount > d.budget ? 'rgba(220, 53, 69, 0.7)' : 'rgba(0, 123, 255, 0.7)'),
+                borderColor: familySpendingData.map(d => d.amount > d.budget ? '#dc3545' : '#007bff'),
+                borderWidth: 1
+            }]
+        }, {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return curSym + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + curSym + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        });
+</script>

@@ -1,0 +1,306 @@
+@model List<DoughDoodle.Models.Category>
+@{
+    ViewBag.Title = "Monthly Budget Workflow";
+    var monthYear = ViewBag.MonthYear as string ?? DateTime.Now.ToString("yyyy-MM");
+    var canCopyLastMonth = (bool)(ViewBag.CanCopyLastMonth ?? false);
+    var accountBalance = (decimal)(ViewBag.AccountBalance ?? 0);
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="bi bi-calendar3"></i> 
+                    Budget for @DateTime.ParseExact(monthYear + "-01", "yyyy-MM-dd", null).ToString("MMMM yyyy")
+                </h2>
+                <div class="btn-group">
+                    @if (canCopyLastMonth)
+                    {
+                        <form asp-action="CopyLastMonthBudgets" method="post" style="display: inline;">
+                            <input type="hidden" name="monthYear" value="@monthYear" />
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-copy"></i> Copy Last Month
+                            </button>
+                        </form>
+                    }
+                    <a href="@Url.Action("RolloverPreview", new { fromMonth = DateTime.ParseExact(monthYear + "-01", "yyyy-MM-dd", null).AddMonths(-1).ToString("yyyy-MM") })" 
+                       class="btn btn-outline-success">
+                        <i class="bi bi-arrow-right-circle"></i> Review Rollover
+                    </a>
+                </div>
+            </div>
+
+            <!-- Budget Creation Tools -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-tools"></i> Budget Creation Tools</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <h6>Available Funds</h6>
+                                <h4 class="text-primary">@CurrencyDisplay.Format(accountBalance, ViewData["PreferredCurrency"] as string)</h4>
+                                <small class="text-muted">On-budget accounts</small>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h6>Quick Actions</h6>
+                            <div class="btn-group-vertical w-100">
+                                <a href="@Url.Action("AddCategory", "Home")" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-plus-circle"></i> Add New Category
+                                </a>
+                                <a href="@Url.Action("Transfer", new { monthYear })" class="btn btn-outline-warning btn-sm">
+                                    <i class="bi bi-arrow-left-right"></i> Transfer Money Between Categories
+                                </a>
+                                <a href="@Url.Action("CoverOverspend", new { monthYear })" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-shield-exclamation"></i> Cover Overspending
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Table -->
+            <div class="card">
+                <div class="card-body">
+                    @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted"></i>
+                            <h4>No Categories Yet</h4>
+                            <p class="text-muted">Start by creating your first budget category.</p>
+                            <a href="@Url.Action("AddCategory", "Home")" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Create First Category
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        decimal totalBudgeted = 0, totalSpent = 0, totalRemaining = 0;
+                        
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-end">Budgeted</th>
+                                    <th class="text-end">Spent</th>
+                                    <th class="text-end">Available</th>
+                                    <th>Progress</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var category in Model)
+                                {
+                                    var currentBudget = category.Budgets.FirstOrDefault(b => b.MonthYear == monthYear)?.Amount ?? 0;
+                                    var spent = category.Transactions.Where(t => t.Date.ToString("yyyy-MM") == monthYear).Sum(t => t.Amount);
+                                    var remaining = currentBudget + spent; // spent is negative
+                                    var progressPercent = currentBudget > 0 ? Math.Abs(spent) / currentBudget * 100 : 0;
+                                    var progressClass = remaining > 0 ? "bg-success" : remaining == 0 ? "bg-warning" : "bg-danger";
+
+                                    totalBudgeted += currentBudget;
+                                    totalSpent += Math.Abs(spent);
+                                    totalRemaining += remaining;
+
+                                    <tr>
+                                        <td>
+                                            <strong>@category.Name</strong>
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-link p-0 text-decoration-none" 
+                                                    onclick="setBudget(@category.Id, '@monthYear', '@category.Name', @currentBudget)"
+                                                    title="Click to set budget">
+                                                @CurrencyDisplay.Format(currentBudget, ViewData["PreferredCurrency"] as string)
+                                            </button>
+                                        </td>
+                                        <td class="text-end">
+                                            @CurrencyDisplay.Format(Math.Abs(spent), ViewData["PreferredCurrency"] as string)
+                                        </td>
+                                        <td class="text-end">
+                                            <span class="@(remaining < 0 ? "text-danger" : remaining == 0 ? "text-warning" : "text-success")">
+                                                @CurrencyDisplay.Format(remaining, ViewData["PreferredCurrency"] as string)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar @progressClass" 
+                                                     role="progressbar" 
+                                                     style="width: @Math.Min(100, progressPercent)%"
+                                                     title="@progressPercent.ToString("F1")% used">
+                                                    @if (progressPercent > 15)
+                                                    {
+                                                        <small>@progressPercent.ToString("F0")%</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="@Url.Action("AddTransaction", "Home")?categoryId=@category.Id" 
+                                                   class="btn btn-sm btn-outline-primary" title="Add Transaction">
+                                                    <i class="bi bi-plus"></i>
+                                                </a>
+                                                <a href="@Url.Action("EditCategory", "Home", new { id = category.Id })" 
+                                                   class="btn btn-sm btn-outline-secondary" title="Edit Category">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-dark">
+                                <tr>
+                                    <th>Totals</th>
+                                    <th class="text-end">@CurrencyDisplay.Format(totalBudgeted, ViewData["PreferredCurrency"] as string)</th>
+                                    <th class="text-end">@CurrencyDisplay.Format(totalSpent, ViewData["PreferredCurrency"] as string)</th>
+                                    <th class="text-end">
+                                        <span class="@(totalRemaining < 0 ? "text-danger" : "text-success")">
+                                            @CurrencyDisplay.Format(totalRemaining, ViewData["PreferredCurrency"] as string)
+                                        </span>
+                                    </th>
+                                    <th colspan="2">
+                                        @if (totalBudgeted > 0)
+                                        {
+                                            <small>@((totalSpent / totalBudgeted * 100).ToString("F1"))% of budget used</small>
+                                        }
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        
+                        <script>
+                            // Store total budgeted value for sidebar use
+                            window.totalBudgeted = @totalBudgeted;
+                        </script>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-graph-up"></i> Budget Health</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        decimal budgetedAmount = 0; // Will be set by JavaScript if categories exist
+                        var unallocatedFunds = accountBalance - budgetedAmount;
+                    }
+                    
+                    <div class="mb-3">
+                        <h6>Account Balance vs Budgeted</h6>
+                        <div class="d-flex justify-content-between">
+                            <span>Available:</span>
+                            <span class="fw-bold">@CurrencyDisplay.Format(accountBalance, ViewData["PreferredCurrency"] as string)</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Budgeted:</span>
+                            <span class="fw-bold" id="budgetedAmount">@CurrencyDisplay.Format(budgetedAmount, ViewData["PreferredCurrency"] as string)</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span>Unallocated:</span>
+                            <span class="fw-bold" id="unallocatedAmount">
+                                @CurrencyDisplay.Format(unallocatedFunds, ViewData["PreferredCurrency"] as string)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="budgetAlert" class="alert d-none">
+                        <i class="bi bi-info-circle"></i>
+                        <span id="budgetAlertText"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="bi bi-gear"></i> Quick Settings</h5>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("Settings")" class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="bi bi-sliders"></i> Budget Settings
+                    </a>
+                    <a href="@Url.Action("Index", "Accounts")" class="btn btn-outline-info w-100">
+                        <i class="bi bi-bank"></i> Manage Accounts
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update sidebar with calculated totals
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof window.totalBudgeted !== 'undefined') {
+        const budgetedAmount = window.totalBudgeted;
+        const accountBalance = @accountBalance;
+        const unallocatedFunds = accountBalance - budgetedAmount;
+        
+        document.getElementById('budgetedAmount').textContent = budgetedAmount.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+        document.getElementById('unallocatedAmount').textContent = unallocatedFunds.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+        
+        const alertDiv = document.getElementById('budgetAlert');
+        const alertText = document.getElementById('budgetAlertText');
+        
+        if (unallocatedFunds < 0) {
+            alertDiv.className = 'alert alert-warning';
+            alertText.innerHTML = '<strong>Over-allocated!</strong><br>You\'ve budgeted more than you have available.';
+        } else if (unallocatedFunds > 0) {
+            alertDiv.className = 'alert alert-info';
+            alertText.innerHTML = '<strong>Funds Available</strong><br>You have ' + unallocatedFunds.toLocaleString('en-US', {style: 'currency', currency: 'USD'}) + ' left to allocate.';
+        } else {
+            alertDiv.className = 'alert alert-success';
+            alertText.innerHTML = '<strong>Fully Allocated!</strong><br>Every dollar has a job.';
+        }
+        
+        alertDiv.classList.remove('d-none');
+    }
+});
+
+function setBudget(categoryId, monthYear, categoryName, currentAmount) {
+    const newAmount = prompt(`Set budget for ${categoryName} (${monthYear}):`, currentAmount);
+    if (newAmount !== null && !isNaN(newAmount) && newAmount !== '') {
+        // Submit form to set budget
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '@Url.Action("SetMonthlyBudget", "Home")';
+        
+        const categoryIdInput = document.createElement('input');
+        categoryIdInput.type = 'hidden';
+        categoryIdInput.name = 'categoryId';
+        categoryIdInput.value = categoryId;
+        
+        const monthYearInput = document.createElement('input');
+        monthYearInput.type = 'hidden';
+        monthYearInput.name = 'monthYear';
+        monthYearInput.value = monthYear;
+        
+        const amountInput = document.createElement('input');
+        amountInput.type = 'hidden';
+        amountInput.name = 'amount';
+        amountInput.value = newAmount;
+        
+        // Add anti-forgery token
+        const tokenInput = document.createElement('input');
+        tokenInput.type = 'hidden';
+        tokenInput.name = '__RequestVerificationToken';
+        tokenInput.value = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        
+        form.appendChild(categoryIdInput);
+        form.appendChild(monthYearInput);
+        form.appendChild(amountInput);
+        form.appendChild(tokenInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>

@@ -1,0 +1,390 @@
+@{
+    ViewData["Title"] = "AI Budget Forecasting";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0"><i class="bi bi-crystal-ball"></i> AI Budget Forecasting</h2>
+                    <p class="mb-0">Predict future spending patterns and optimize your budget with AI-powered insights</p>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="forecastMonths" class="form-label">Forecast Period</label>
+                            <select id="forecastMonths" class="form-select">
+                                <option value="3">Next 3 Months</option>
+                                <option value="6">Next 6 Months</option>
+                                <option value="12">Next 12 Months</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button id="generateForecastBtn" class="btn btn-success btn-lg">
+                                <i class="bi bi-magic"></i> Generate AI Forecast
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Forecast Results -->
+                    <div id="forecastResults" class="mt-4" style="display: none;">
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <!-- Monthly Forecasts Chart Area -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="bi bi-graph-up"></i> Monthly Spending Forecast</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="forecastChart" width="400" height="200"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- Category Forecasts -->
+                                <div class="card mt-4">
+                                    <div class="card-header">
+                                        <h5><i class="bi bi-pie-chart"></i> Category-wise Forecasts</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="categoryForecasts" class="table-responsive">
+                                            <!-- Dynamic content will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4">
+                                <!-- Forecast Summary -->
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0"><i class="bi bi-clipboard-data"></i> Forecast Summary</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="forecastSummary">
+                                            <!-- Dynamic content -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Seasonal Adjustments -->
+                                <div class="card border-warning mt-4">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0"><i class="bi bi-calendar3"></i> Seasonal Adjustments</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="seasonalAdjustments">
+                                            <!-- Dynamic content -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AI Insights -->
+                                <div class="card border-primary mt-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0"><i class="bi bi-lightbulb"></i> AI Insights</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="forecastInsights">
+                                            <!-- Dynamic content -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="forecastLoading" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-success" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Analyzing historical data and generating forecasts...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forecast Methodology -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card border-secondary">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="mb-0"><i class="bi bi-info-circle"></i> How AI Forecasting Works</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="bi bi-database text-primary" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2">Historical Analysis</h6>
+                                <p class="small">Analyzes your past 12 months of spending patterns</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="bi bi-graph-up text-success" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2">Trend Detection</h6>
+                                <p class="small">Identifies upward or downward spending trends</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="bi bi-calendar-date text-warning" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2">Seasonal Patterns</h6>
+                                <p class="small">Accounts for holiday and seasonal spending variations</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <i class="bi bi-crystal-ball text-info" style="font-size: 2rem;"></i>
+                                <h6 class="mt-2">Smart Prediction</h6>
+                                <p class="small">Generates accurate forecasts with confidence intervals</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <small><i class="bi bi-shield-check"></i> <strong>Privacy Note:</strong> All analysis is performed on your data only. No personal information is shared externally.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)));
+let forecastData = null;
+let forecastChart = null;
+
+document.getElementById('generateForecastBtn').addEventListener('click', generateBudgetForecast);
+
+async function generateBudgetForecast() {
+    const months = document.getElementById('forecastMonths').value;
+    const button = document.getElementById('generateForecastBtn');
+    const originalText = button.innerHTML;
+    
+    // Show loading state
+    button.innerHTML = '<i class="bi bi-hourglass-split"></i> Generating Forecast...';
+    button.disabled = true;
+    document.getElementById('forecastLoading').style.display = 'block';
+    document.getElementById('forecastResults').style.display = 'none';
+
+    try {
+        const response = await fetch(`/AIAdvisor/GetBudgetForecast?months=${months}`);
+        forecastData = await response.json();
+        
+        displayForecastResults(forecastData);
+        document.getElementById('forecastLoading').style.display = 'none';
+        document.getElementById('forecastResults').style.display = 'block';
+    } catch (error) {
+        console.error('Error generating forecast:', error);
+        alert('Unable to generate forecast at this time. Please check your connection.');
+        document.getElementById('forecastLoading').style.display = 'none';
+    } finally {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }
+}
+
+function displayForecastResults(data) {
+    // Display forecast chart
+    displayForecastChart(data.monthlyForecasts);
+    
+    // Display category forecasts table
+    displayCategoryForecasts(data.monthlyForecasts);
+    
+    // Display forecast summary
+    displayForecastSummary(data);
+    
+    // Display seasonal adjustments
+    displaySeasonalAdjustments(data.seasonalAdjustments);
+    
+    // Display AI insights
+    displayForecastInsights(data.forecastInsights);
+}
+
+function displayForecastChart(monthlyForecasts) {
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    
+    if (forecastChart) {
+        forecastChart.destroy();
+    }
+    
+    const labels = monthlyForecasts.map(f => f.month);
+    const spendingData = monthlyForecasts.map(f => f.predictedSpending);
+    const incomeData = monthlyForecasts.map(f => f.predictedIncome);
+    
+    forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Predicted Spending',
+                    data: spendingData,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1
+                },
+                {
+                    label: 'Predicted Income',
+                    data: incomeData,
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Income vs Spending Forecast'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return currencySymbol + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function displayCategoryForecasts(monthlyForecasts) {
+    const container = document.getElementById('categoryForecasts');
+    
+    if (!monthlyForecasts || monthlyForecasts.length === 0) {
+        container.innerHTML = '<p class="text-muted">No category forecast data available.</p>';
+        return;
+    }
+    
+    // Get all unique categories from the first month
+    const categories = monthlyForecasts[0].categoryForecasts || [];
+    
+    let tableHtml = `
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Category</th>
+                    <th>Current Budget</th>
+                    <th>Predicted Amount</th>
+                    <th>Variance</th>
+                    <th>Trend</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    categories.forEach(category => {
+        const varianceClass = category.varianceFromBudget > 0 ? 'text-danger' : 'text-success';
+        const trendIcon = category.trend === 'Increasing' ? 'bi-arrow-up text-danger' : 
+                         category.trend === 'Decreasing' ? 'bi-arrow-down text-success' : 
+                         'bi-arrow-right text-muted';
+        
+        tableHtml += `
+            <tr>
+                <td><strong>${category.categoryName}</strong></td>
+                <td>${currencySymbol}${category.predictedAmount.toFixed(2)}</td>
+                <td>${currencySymbol}${category.predictedAmount.toFixed(2)}</td>
+                <td class="${varianceClass}">${currencySymbol}${category.varianceFromBudget.toFixed(2)}</td>
+                <td><i class="bi ${trendIcon}"></i> ${category.trend}</td>
+            </tr>
+        `;
+    });
+    
+    tableHtml += `
+            </tbody>
+        </table>
+    `;
+    
+    container.innerHTML = tableHtml;
+}
+
+function displayForecastSummary(data) {
+    const container = document.getElementById('forecastSummary');
+    const totalPredictedSpending = data.monthlyForecasts.reduce((sum, f) => sum + f.predictedSpending, 0);
+    const totalPredictedIncome = data.monthlyForecasts.reduce((sum, f) => sum + f.predictedIncome, 0);
+    const totalSurplus = totalPredictedIncome - totalPredictedSpending;
+    
+    const summaryHtml = `
+        <div class="row text-center">
+            <div class="col-12 mb-3">
+                <h5 class="text-primary">${currencySymbol}${totalPredictedSpending.toLocaleString()}</h5>
+                <small>Total Predicted Spending</small>
+            </div>
+            <div class="col-12 mb-3">
+                <h5 class="text-success">${currencySymbol}${totalPredictedIncome.toLocaleString()}</h5>
+                <small>Total Predicted Income</small>
+            </div>
+            <div class="col-12 mb-3">
+                <h5 class="${totalSurplus >= 0 ? 'text-success' : 'text-danger'}">
+                    ${currencySymbol}${Math.abs(totalSurplus).toLocaleString()}
+                </h5>
+                <small>${totalSurplus >= 0 ? 'Predicted Surplus' : 'Predicted Deficit'}</small>
+            </div>
+        </div>
+        <div class="mt-3">
+            <strong>Overall Trend:</strong>
+            <p class="mb-0">${data.overallTrend}</p>
+        </div>
+    `;
+    
+    container.innerHTML = summaryHtml;
+}
+
+function displaySeasonalAdjustments(adjustments) {
+    const container = document.getElementById('seasonalAdjustments');
+    
+    if (!adjustments || adjustments.length === 0) {
+        container.innerHTML = '<p class="text-muted">No seasonal adjustments recommended.</p>';
+        return;
+    }
+    
+    let adjustmentsHtml = '';
+    adjustments.forEach(adjustment => {
+        const adjustmentClass = adjustment.adjustmentPercentage > 0 ? 'text-warning' : 'text-info';
+        adjustmentsHtml += `
+            <div class="mb-3">
+                <strong>${adjustment.category}</strong> - ${adjustment.season}
+                <br><span class="${adjustmentClass}">${adjustment.adjustmentPercentage > 0 ? '+' : ''}${adjustment.adjustmentPercentage}%</span>
+                <br><small class="text-muted">${adjustment.reasoning}</small>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = adjustmentsHtml;
+}
+
+function displayForecastInsights(insights) {
+    const container = document.getElementById('forecastInsights');
+    
+    if (!insights || insights.length === 0) {
+        container.innerHTML = '<p class="text-muted">No specific insights available.</p>';
+        return;
+    }
+    
+    let insightsHtml = '<ul class="list-unstyled">';
+    insights.forEach(insight => {
+        insightsHtml += `<li class="mb-2"><i class="bi bi-check-circle text-success"></i> ${insight}</li>`;
+    });
+    insightsHtml += '</ul>';
+    
+    container.innerHTML = insightsHtml;
+}
+
+// Initialize Chart.js if not already loaded
+if (typeof Chart === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+    document.head.appendChild(script);
+}
+</script>

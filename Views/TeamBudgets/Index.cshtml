@@ -1,0 +1,28 @@
+@model IEnumerable<DoughDoodle.Models.SharedEnvelope>
+@{
+  ViewData["Title"] = "Team budgets";
+  var cats = (IEnumerable<DoughDoodle.Models.Category>)ViewBag.Categories;
+  var isOwner = (bool)ViewBag.IsOwner;
+}
+<h2><i class="bi bi-people"></i> Shared household envelopes</h2>
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+@if (TempData["Error"] != null) { <div class="alert alert-danger">@TempData["Error"]</div> }
+@if (isOwner) {
+<form method="post" asp-action="Share" class="row g-2 mb-3">
+  @Html.AntiForgeryToken()
+  <div class="col-md-4">
+    <select name="categoryId" class="form-select">
+      @foreach (var c in cats) { <option value="@c.Id">@c.Name</option> }
+    </select>
+  </div>
+  <div class="col-auto form-check mt-2"><input class="form-check-input" type="checkbox" name="allowSpend" value="true" checked /><label class="form-check-label">Allow spend</label></div>
+  <div class="col-auto form-check mt-2"><input class="form-check-input" type="checkbox" name="allowEdit" value="true" /><label class="form-check-label">Allow edit budget</label></div>
+  <div class="col-auto"><button class="btn btn-primary">Share envelope</button></div>
+</form>
+}
+<table class="table"><thead><tr><th>Envelope</th><th>Spend</th><th>Edit budget</th></tr></thead>
+<tbody>
+@foreach (var s in Model) {
+  <tr><td>@s.Category?.Name</td><td>@(s.AllowMemberSpend ? "Yes" : "No")</td><td>@(s.AllowMemberEditBudget ? "Yes" : "No")</td></tr>
+}
+</tbody></table>

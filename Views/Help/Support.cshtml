@@ -1,0 +1,227 @@
+@{
+    ViewData["Title"] = "Support Options";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1><i class="bi bi-question-circle-fill text-primary"></i> Support Options</h1>
+                    <p class="text-muted mb-0">Choose the best way to get help with DoughDoodle</p>
+                </div>
+                <div>
+                    <a asp-action="Index" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Help
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Options -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-info mb-3">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <h5 class="card-title">Self-Help Resources</h5>
+                    <p class="card-text">Find instant answers in our comprehensive help center with guides, tutorials, and FAQs.</p>
+                    <div class="mt-auto">
+                        <a asp-action="Index" class="btn btn-info">Browse Help Center</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-warning mb-3">
+                        <i class="bi bi-question-circle"></i>
+                    </div>
+                    <h5 class="card-title">Frequently Asked Questions</h5>
+                    <p class="card-text">Quick answers to the most common questions about using DoughDoodle effectively.</p>
+                    <div class="mt-auto">
+                        <a asp-action="FAQ" class="btn btn-warning">View FAQ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="display-4 text-success mb-3">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <h5 class="card-title">Contact Support Team</h5>
+                    <p class="card-text">Get personalized help from our support team via email, chat, or phone support.</p>
+                    <div class="mt-auto">
+                        <a asp-action="ContactSupport" class="btn btn-success">Contact Support</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Help Topics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Help Topics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a asp-action="GettingStarted" class="text-decoration-none">
+                                        <i class="bi bi-play-circle text-primary"></i> Getting Started Guide
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a asp-action="EnvelopeBudgeting" class="text-decoration-none">
+                                        <i class="bi bi-envelope text-success"></i> How Envelope Budgeting Works
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a asp-action="Reports" class="text-decoration-none">
+                                        <i class="bi bi-graph-up text-info"></i> Understanding Reports & Analytics
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <a asp-controller="Goals" asp-action="Index" class="text-decoration-none">
+                                        <i class="bi bi-target text-warning"></i> Setting Up Financial Goals
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a asp-controller="Dashboard" asp-action="Index" class="text-decoration-none">
+                                        <i class="bi bi-speedometer2 text-danger"></i> Using Your Dashboard
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a asp-controller="Settings" asp-action="Index" class="text-decoration-none">
+                                        <i class="bi bi-gear text-secondary"></i> Account Settings & Preferences
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Hours & Response Times -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-clock"></i> Support Hours</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>Live Chat:</strong><br>
+                            <small class="text-muted">Monday - Friday<br>9:00 AM - 6:00 PM EST</small>
+                        </div>
+                        <div class="col-6">
+                            <strong>Email Support:</strong><br>
+                            <small class="text-muted">24/7 Availability<br>Response within 24 hours</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-shield-check"></i> What We Help With</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="bi bi-check2 text-success"></i> Account setup and configuration</li>
+                        <li><i class="bi bi-check2 text-success"></i> Budget creation and management</li>
+                        <li><i class="bi bi-check2 text-success"></i> Feature explanations and tutorials</li>
+                        <li><i class="bi bi-check2 text-success"></i> Technical issues and bug reports</li>
+                        <li><i class="bi bi-check2 text-success"></i> Data import/export assistance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Support -->
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-info me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <h6 class="alert-heading mb-1">Need Immediate Help?</h6>
+                        <p class="mb-0">For urgent account issues or technical problems preventing you from accessing your budget, please use our priority support channel through the Contact Support page.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Resources -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-star"></i> Additional Resources</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="bi bi-youtube text-danger mb-2" style="font-size: 2rem;"></i>
+                            <h6>Video Tutorials</h6>
+                            <p class="small text-muted">Watch step-by-step guides on our YouTube channel</p>
+                            <a href="#" class="btn btn-sm btn-outline-danger">Coming Soon</a>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="bi bi-people text-primary mb-2" style="font-size: 2rem;"></i>
+                            <h6>Community Forum</h6>
+                            <p class="small text-muted">Connect with other DoughDoodle users and share tips</p>
+                            <a href="#" class="btn btn-sm btn-outline-primary">Coming Soon</a>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="bi bi-file-text text-success mb-2" style="font-size: 2rem;"></i>
+                            <h6>User Guide (PDF)</h6>
+                            <p class="small text-muted">Download our comprehensive user manual</p>
+                            <a href="#" class="btn btn-sm btn-outline-success">Coming Soon</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.display-4 {
+    font-size: 2.5rem;
+}
+</style>

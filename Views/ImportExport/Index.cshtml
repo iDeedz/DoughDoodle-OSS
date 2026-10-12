@@ -1,0 +1,297 @@
+@model DoughDoodle.Models.ViewModels.ImportExportViewModel
+@{
+    ViewData["Title"] = "Import & Export Data";
+}
+
+<div class="container-fluid">
+    <div class="alert alert-info border-0 shadow-sm"><i class="bi bi-shield-check"></i> <strong>Honest import path:</strong> CSV is our bank path — we do not claim Open Banking or Plaid sync. Export from your bank, map columns, assign to envelopes.</div>
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <h1 class="mb-0"><i class="bi bi-arrow-down-up"></i> Import &amp; Export Data</h1>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importModal">
+                        <i class="bi bi-upload"></i> Import Data
+                    </button>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-download"></i> Export Data
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-action="ExportTransactions">
+                                <i class="bi bi-file-earmark-text"></i> Export Transactions
+                            </a></li>
+                            <li><a class="dropdown-item" asp-action="ExportBudgets">
+                                <i class="bi bi-pie-chart"></i> Export Budgets
+                            </a></li>
+                            <li><a class="dropdown-item" asp-action="ExportGoals">
+                                <i class="bi bi-target"></i> Export Goals
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="mb-3"><a asp-action="MappingTemplates" class="btn btn-outline-primary btn-sm">Column mapping templates</a> <span class="text-muted small">Supports CSV, OFX, QFX, QIF</span></p>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Import sessions</div>
+                        <div class="dd-metric-value">@Model.ImportSessionCount</div>
+                        <div class="dd-metric-meta">Your files only</div>
+                    </div>
+                    <div class="dd-metric-icon teal"><i class="bi bi-upload"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Records imported</div>
+                        <div class="dd-metric-value">@Model.RecordsImported.ToString("N0")</div>
+                        <div class="dd-metric-meta">Successful rows</div>
+                    </div>
+                    <div class="dd-metric-icon success"><i class="bi bi-check-circle"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Export downloads</div>
+                        <div class="dd-metric-value">@Model.ExportDownloadCount</div>
+                        <div class="dd-metric-meta">Not tracked</div>
+                    </div>
+                    <div class="dd-metric-icon charcoal"><i class="bi bi-download"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Last activity</div>
+                        <div class="dd-metric-value">@Model.LastActivityLabel</div>
+                        <div class="dd-metric-meta">@(Model.LastActivityAt?.ToLocalTime().ToString("MMM d, yyyy") ?? "No imports yet")</div>
+                    </div>
+                    <div class="dd-metric-icon gold"><i class="bi bi-clock"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Import History -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-clock-history"></i> Recent Import History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Records</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (!Model.RecentImports.Any())
+                                {
+                                    <tr><td colspan="4" class="text-center text-muted py-4">No imports yet. Upload a CSV when you are ready.</td></tr>
+                                }
+                                @foreach (var session in Model.RecentImports)
+                                {
+                                    var badge = session.Status switch
+                                    {
+                                        ImportStatus.Completed => "bg-success",
+                                        ImportStatus.PartiallyCompleted => "bg-warning text-dark",
+                                        ImportStatus.Failed => "bg-danger",
+                                        ImportStatus.Processing => "bg-info text-dark",
+                                        _ => "bg-secondary"
+                                    };
+                                    var when = session.CompletedAt ?? session.CreatedAt;
+                                    <tr>
+                                        <td>@when.ToLocalTime().ToString("MMM d, yyyy")</td>
+                                        <td>@session.FileType</td>
+                                        <td>@session.SuccessfulRecords</td>
+                                        <td><span class="badge @badge">@session.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Guide -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle"></i> Data Management Guide</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Import Data:</h6>
+                    <ul class="small">
+                        <li>Support for CSV files from major banks and financial institutions</li>
+                        <li>Automatic transaction categorization based on description patterns</li>
+                        <li>Duplicate detection and prevention</li>
+                        <li>Import validation with detailed error reporting</li>
+                    </ul>
+                    
+                    <h6>Export Options:</h6>
+                    <ul class="small">
+                        <li><strong>Transactions:</strong> Export all transactions with categories and notes</li>
+                        <li><strong>Budgets:</strong> Export monthly budget data and allocations</li>
+                        <li><strong>Goals:</strong> Export financial goals with progress tracking</li>
+                    </ul>
+
+                    <h6>Supported Formats:</h6>
+                    <ul class="small">
+                        <li>CSV (Comma Separated Values) - Universal format</li>
+                        <li>Excel-compatible formatting</li>
+                        <li>UTF-8 encoding for international characters</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Export Buttons -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-lightning"></i> Quick Export Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a asp-action="ExportTransactions" asp-route-period="month" class="btn btn-outline-primary">
+                                    <i class="bi bi-file-earmark-text"></i><br>
+                                    <strong>This Month's Transactions</strong><br>
+                                    <small class="text-muted">Export current month data</small>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a asp-action="ExportBudgets" asp-route-period="current" class="btn btn-outline-success">
+                                    <i class="bi bi-pie-chart"></i><br>
+                                    <strong>Current Budget</strong><br>
+                                    <small class="text-muted">Export current budget data</small>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-grid">
+                                <a asp-action="ExportTransactions" asp-route-period="year" class="btn btn-outline-info">
+                                    <i class="bi bi-calendar-year"></i><br>
+                                    <strong>Year-to-Date</strong><br>
+                                    <small class="text-muted">Export all 2024 data</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">
+                    <i class="bi bi-upload"></i> Import Financial Data
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Import" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="importType" class="form-label">Import Type</label>
+                        <select class="form-select" id="importType" name="ImportType" required>
+                            <option value="">Select data type to import...</option>
+                            <option value="Transactions">Transactions</option>
+                            <option value="Budgets">Budget Data</option>
+                            <option value="Goals">Financial Goals</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label">CSV File</label>
+                        <input type="file" class="form-control" id="csvFile" name="CsvFile" accept=".csv" required>
+                        <div class="form-text">
+                            Upload a CSV file with your financial data. Maximum file size: 5MB.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="skipDuplicates" name="SkipDuplicates" checked>
+                            <label class="form-check-label" for="skipDuplicates">
+                                Skip duplicate transactions
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="autoCategorie" name="AutoCategorize" checked>
+                            <label class="form-check-label" for="autoCategorie">
+                                Automatically categorize transactions
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>CSV Format Requirements:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li><strong>Transactions:</strong> Date, Description, Amount, Category (optional)</li>
+                            <li><strong>Budgets:</strong> Category, Amount, Month</li>
+                            <li><strong>Goals:</strong> Name, Target Amount, Target Date, Goal Type</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Import Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary, .btn-outline-success, .btn-outline-info {
+    padding: 1rem;
+    height: auto;
+}
+
+.btn-outline-primary:hover, .btn-outline-success:hover, .btn-outline-info:hover {
+    transform: translateY(-2px);
+}
+</style>

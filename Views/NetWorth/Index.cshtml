@@ -1,0 +1,408 @@
+@model DoughDoodle.Models.ViewModels.NetWorthViewModel
+@{
+    ViewData["Title"] = "Net Worth Tracker";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-graph-up"></i> Net Worth Tracker</h2>
+                <a href="@Url.Action("Create")" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Asset/Liability
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-success">Total Assets</h5>
+                    <h3 class="text-success">@CurrencyDisplay.Format(Model.TotalAssets, ViewData["PreferredCurrency"] as string)</h3>
+                    <small class="text-muted">@Model.AssetCount items</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-danger">Total Liabilities</h5>
+                    <h3 class="text-danger">@CurrencyDisplay.Format(Model.TotalLiabilities, ViewData["PreferredCurrency"] as string)</h3>
+                    <small class="text-muted">@Model.LiabilityCount items</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card @(Model.NetWorth >= 0 ? "border-primary" : "border-warning")">
+                <div class="card-body text-center">
+                    <h5 class="card-title @(Model.NetWorth >= 0 ? "text-primary" : "text-warning")">Net Worth</h5>
+                    <h3 class="@(Model.NetWorth >= 0 ? "text-primary" : "text-warning")">@CurrencyDisplay.Format(Model.NetWorth, ViewData["PreferredCurrency"] as string)</h3>
+                    <small class="text-muted">Assets - Liabilities</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-info">Total Items</h5>
+                    <h3 class="text-info">@Model.TotalItems</h3>
+                    <small class="text-muted">Tracked items</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    @if (Model.MonthlyTrends.Any())
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-graph-up-arrow"></i> Net Worth Trend</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="netWorthChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Assets Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Assets (@Model.AssetCount)</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Assets.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Current Value</th>
+                                        <th>Last Updated</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var asset in Model.Assets)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@asset.Name</strong>
+                                                @if (!string.IsNullOrEmpty(asset.Description))
+                                                {
+                                                    <br><small class="text-muted">@asset.Description</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (asset.AssetType.HasValue)
+                                                {
+                                                    <span class="badge bg-success">@asset.AssetType</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not specified</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-success">@CurrencyDisplay.Format(asset.CurrentValue, ViewData["PreferredCurrency"] as string)</span>
+                                            </td>
+                                            <td>@asset.LastUpdated.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" onclick="updateValue(@asset.Id, '@asset.Name', @asset.CurrentValue)">
+                                                    <i class="bi bi-pencil"></i> Update
+                                                </button>
+                                                <a href="@Url.Action("Edit", new { id = asset.Id })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-gear"></i>
+                                                </a>
+                                                <a href="@Url.Action("History", new { id = asset.Id })" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-clock-history"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteItem(@asset.Id, '@asset.Name')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bi bi-plus-circle display-4 text-muted"></i>
+                            <h5 class="text-muted mt-3">No Assets Yet</h5>
+                            <p class="text-muted">Add your first asset to start tracking your net worth.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liabilities Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-dash-circle"></i> Liabilities (@Model.LiabilityCount)</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Liabilities.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Current Balance</th>
+                                        <th>Last Updated</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var liability in Model.Liabilities)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@liability.Name</strong>
+                                                @if (!string.IsNullOrEmpty(liability.Description))
+                                                {
+                                                    <br><small class="text-muted">@liability.Description</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (liability.LiabilityType.HasValue)
+                                                {
+                                                    <span class="badge bg-danger">@liability.LiabilityType</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">Not specified</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold text-danger">@CurrencyDisplay.Format(liability.CurrentValue, ViewData["PreferredCurrency"] as string)</span>
+                                            </td>
+                                            <td>@liability.LastUpdated.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" onclick="updateValue(@liability.Id, '@liability.Name', @liability.CurrentValue)">
+                                                    <i class="bi bi-pencil"></i> Update
+                                                </button>
+                                                <a href="@Url.Action("Edit", new { id = liability.Id })" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-gear"></i>
+                                                </a>
+                                                <a href="@Url.Action("History", new { id = liability.Id })" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-clock-history"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger" onclick="deleteItem(@liability.Id, '@liability.Name')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <i class="bi bi-dash-circle display-4 text-muted"></i>
+                            <h5 class="text-muted mt-3">No Liabilities Yet</h5>
+                            <p class="text-muted">Add your debts and liabilities to get a complete net worth picture.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Value Modal -->
+<div class="modal fade" id="updateValueModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Value</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateValueForm">
+                    <input type="hidden" id="itemId" />
+                    <div class="mb-3">
+                        <label for="itemName" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="itemName" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label for="currentValue" class="form-label">Current Value</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)</span>
+                            <input type="number" step="0.01" class="form-control" id="currentValue" required />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateNotes" class="form-label">Notes (Optional)</label>
+                        <textarea class="form-control" id="updateNotes" rows="2" placeholder="Reason for the value change"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitUpdateValue()">Update Value</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const currencySymbol = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(CurrencyDisplay.Symbol(ViewData["PreferredCurrency"] as string)));
+function updateValue(itemId, itemName, currentValue) {
+    document.getElementById('itemId').value = itemId;
+    document.getElementById('itemName').value = itemName;
+    document.getElementById('currentValue').value = currentValue;
+    document.getElementById('updateNotes').value = '';
+    
+    var modal = new bootstrap.Modal(document.getElementById('updateValueModal'));
+    modal.show();
+}
+
+function submitUpdateValue() {
+    const itemId = document.getElementById('itemId').value;
+    const newValue = document.getElementById('currentValue').value;
+    const notes = document.getElementById('updateNotes').value;
+    
+    if (!newValue || newValue < 0) {
+        alert('Please enter a valid value.');
+        return;
+    }
+    
+    fetch('@Url.Action("UpdateValue")', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify({
+            id: itemId,
+            newValue: parseFloat(newValue),
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error updating value. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating value. Please try again.');
+    });
+}
+
+function deleteItem(itemId, itemName) {
+    if (confirm(`Are you sure you want to remove "${itemName}" from your net worth tracking?`)) {
+        fetch('@Url.Action("Delete")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ id: itemId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error removing item. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error removing item. Please try again.');
+        });
+    }
+}
+
+// Initialize Chart
+@if (Model.MonthlyTrends.Any())
+{
+    <text>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('netWorthChart').getContext('2d');
+        
+        const chartData = {
+            labels: [@Html.Raw(string.Join(",", Model.MonthlyTrends.Select(t => $"'{t.Month}'")))],
+            datasets: [{
+                label: 'Net Worth',
+                data: [@Html.Raw(string.Join(",", Model.MonthlyTrends.Select(t => t.NetWorth)))],
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Assets',
+                data: [@Html.Raw(string.Join(",", Model.MonthlyTrends.Select(t => t.Assets)))],
+                borderColor: '#198754',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                tension: 0.4,
+                fill: false
+            }, {
+                label: 'Liabilities',
+                data: [@Html.Raw(string.Join(",", Model.MonthlyTrends.Select(t => t.Liabilities)))],
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.4,
+                fill: false
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Net Worth Progression'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return currencySymbol + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </text>
+}
+</script>
+}

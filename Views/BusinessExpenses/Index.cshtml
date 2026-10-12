@@ -1,0 +1,20 @@
+@model IEnumerable<DoughDoodle.Models.ExpenseProject>
+@{ ViewData["Title"] = "Business expenses"; var spend = (Dictionary<int, decimal>)ViewBag.Spend; }
+<h2><i class="bi bi-briefcase"></i> Business expense projects</h2>
+@if (TempData["Success"] != null) { <div class="alert alert-success">@TempData["Success"]</div> }
+<form method="post" asp-action="Create" class="row g-2 mb-4">
+  @Html.AntiForgeryToken()
+  <div class="col-auto"><input name="name" class="form-control" placeholder="Project name" required /></div>
+  <div class="col-auto"><input name="description" class="form-control" placeholder="Description" /></div>
+  <div class="col-auto"><button class="btn btn-primary">Add project</button></div>
+</form>
+<table class="table"><thead><tr><th>Name</th><th>Spend</th><th></th></tr></thead>
+<tbody>
+@foreach (var p in Model) {
+  <tr>
+    <td>@p.Name <small class="text-muted">@p.Description</small></td>
+    <td>@CurrencyDisplay.Format(spend.TryGetValue(p.Id, out var t) ? t : 0m, ViewData["PreferredCurrency"] as string)</td>
+    <td><a asp-action="Report" asp-route-id="@p.Id">Report</a></td>
+  </tr>
+}
+</tbody></table>

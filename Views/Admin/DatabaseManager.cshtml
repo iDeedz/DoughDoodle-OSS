@@ -1,0 +1,211 @@
+@using DoughDoodle.Models.ViewModels
+@model DatabaseManagerViewModel
+@{
+    ViewData["Title"] = "Database Manager";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1><i class="bi bi-database-fill text-success"></i> Database Manager</h1>
+                    <p class="text-muted mb-0">Browse, export, and manage all database tables</p>
+                </div>
+                <div>
+                    <a asp-action="Dashboard" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Database Tables Overview -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-table"></i> Database Tables
+                        <span class="badge bg-light text-dark ms-2">@Model.Tables.Count tables</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">
+                                        <i class="bi bi-table"></i> Table Name
+                                    </th>
+                                    <th scope="col">
+                                        <i class="bi bi-info-circle"></i> Description
+                                    </th>
+                                    <th scope="col" class="text-center">
+                                        <i class="bi bi-hash"></i> Records
+                                    </th>
+                                    <th scope="col" class="text-center">
+                                        <i class="bi bi-tools"></i> Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var table in Model.Tables)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong class="text-primary">@table.TableName</strong>
+                                        </td>
+                                        <td class="text-muted">
+                                            @table.Description
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-info">
+                                                @table.RecordCount.ToString("N0")
+                                            </span>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <a asp-action="BrowseTable" asp-route-tableName="@table.TableName" 
+                                                   class="btn btn-sm btn-outline-primary" title="Browse Data">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a asp-action="ExportTable" asp-route-tableName="@table.TableName" asp-route-format="csv"
+                                                   class="btn btn-sm btn-outline-success" title="Export as CSV">
+                                                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                                                </a>
+                                                <a asp-action="ExportTable" asp-route-tableName="@table.TableName" asp-route-format="json"
+                                                   class="btn btn-sm btn-outline-info" title="Export as JSON">
+                                                    <i class="bi bi-file-earmark-code"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Database Operations -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h6><i class="bi bi-lightning-fill text-warning"></i> Quick Operations</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="refreshTableCounts()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh Table Counts
+                        </button>
+                        <button class="btn btn-outline-info" onclick="exportAllTables()">
+                            <i class="bi bi-download"></i> Export All Tables
+                        </button>
+                        <button class="btn btn-outline-success" onclick="generateBackup()">
+                            <i class="bi bi-shield-check"></i> Generate Database Backup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h6><i class="bi bi-info-circle text-info"></i> Database Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="fs-4 text-primary">@Model.Tables.Count</div>
+                                <small class="text-muted">Total Tables</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <div class="fs-4 text-success">@Model.Tables.Sum(t => t.RecordCount).ToString("N0")</div>
+                                <small class="text-muted">Total Records</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function refreshTableCounts() {
+        location.reload();
+    }
+
+    function exportAllTables() {
+        if (confirm('This will export all database tables as CSV files. Continue?')) {
+            @foreach (var table in Model.Tables)
+            {
+                <text>
+                setTimeout(() => {
+                    window.open('@Url.Action("ExportTable", new { tableName = table.TableName, format = "csv" })');
+                }, @((Model.Tables.IndexOf(table)) * 1000));
+                </text>
+            }
+        }
+    }
+
+    function generateBackup() {
+        alert('Database backup functionality will be implemented in the next update.');
+    }
+</script>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+    }
+    
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .table th {
+        font-weight: 600;
+        font-size: 0.875rem;
+        border-top: none;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.25rem;
+        margin-right: 2px;
+    }
+    
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+</style>

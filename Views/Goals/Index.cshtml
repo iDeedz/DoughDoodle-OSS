@@ -1,0 +1,367 @@
+@using DoughDoodle.Helpers
+@model DoughDoodle.Models.ViewModels.GoalsViewModel
+@{
+    ViewData["Title"] = "Financial Goals";
+    var cc = Model?.PreferredCurrency ?? "USD";
+    var curSym = CurrencyDisplay.Symbol(cc);
+}
+
+<div class="container-fluid dd-dashboard">
+    <div class="dd-page-header dd-fade-up">
+        <div>
+            <div class="dd-accent-bar"></div>
+            <h1>Financial Goals</h1>
+            <p class="dd-subtitle">Stack cash toward targets — savings, debt payoff, emergency fund</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="Create" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-plus-circle"></i> Full form
+            </a>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                <i class="bi bi-plus-circle"></i> Quick add
+            </button>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4 dd-stagger">
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Total goals</div>
+                        <div class="dd-metric-value">@(Model?.TotalGoals ?? 0)</div>
+                        <div class="dd-metric-meta">All time</div>
+                    </div>
+                    <div class="dd-metric-icon teal"><i class="bi bi-bullseye"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Completed</div>
+                        <div class="dd-metric-value">@(Model?.CompletedGoals ?? 0)</div>
+                        <div class="dd-metric-meta">Knocked out</div>
+                    </div>
+                    <div class="dd-metric-icon success"><i class="bi bi-check-circle"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">In progress</div>
+                        <div class="dd-metric-value">@(Model?.ActiveGoals ?? 0)</div>
+                        <div class="dd-metric-meta">Active targets</div>
+                    </div>
+                    <div class="dd-metric-icon gold"><i class="bi bi-clock"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="dd-metric-tile">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div>
+                        <div class="dd-metric-label">Total saved</div>
+                        <div class="dd-metric-value">@CurrencyDisplay.Format(Model?.TotalCurrentAmount ?? 0, cc, compact: true)</div>
+                        <div class="dd-metric-meta">Toward active goals</div>
+                    </div>
+                    <div class="dd-metric-icon coral"><i class="bi bi-piggy-bank"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goals List -->
+    <div class="row">
+        <div class="col-12">
+            @if (Model?.Goals?.Any() == true)
+            {
+                <div class="row g-4">
+                    @foreach (var goal in Model.Goals)
+                    {
+                        var progressPercentage = goal.TargetAmount > 0 ? (double)(goal.CurrentAmount / goal.TargetAmount) * 100 : 0;
+                        var isOverdue = goal.TargetDate.HasValue && goal.TargetDate < DateTime.Now && !goal.IsCompleted;
+                        var daysRemaining = goal.TargetDate?.Subtract(DateTime.Now).Days ?? 0;
+
+                        <div class="col-lg-6">
+                            <div class="card h-100 @(goal.IsCompleted ? "border-success" : isOverdue ? "border-warning" : "")">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-0">
+                                            @goal.Name
+                                            @if (goal.IsCompleted)
+                                            {
+                                                <span class="badge bg-success ms-2"><i class="bi bi-check-circle"></i> Completed</span>
+                                            }
+                                            else if (isOverdue)
+                                            {
+                                                <span class="badge bg-warning ms-2"><i class="bi bi-exclamation-triangle"></i> Overdue</span>
+                                            }
+                                            else if (goal.IsActive)
+                                            {
+                                                <span class="badge bg-primary ms-2"><i class="bi bi-play-circle"></i> Active</span>
+                                            }
+                                        </h5>
+                                        <small class="text-muted">@goal.GoalType</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Details" asp-route-id="@goal.Id">
+                                                    <i class="bi bi-eye"></i> View Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" asp-action="Edit" asp-route-id="@goal.Id">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#progressModal-@goal.Id">
+                                                    <i class="bi bi-plus-circle"></i> Add Progress
+                                                </button>
+                                            </li>
+                                            @if (!goal.IsCompleted)
+                                            {
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <form asp-action="MarkComplete" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@goal.Id" />
+                                                        <button type="submit" class="dropdown-item text-success">
+                                                            <i class="bi bi-check-circle"></i> Mark Complete
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            }
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form asp-action="Delete" method="post" onsubmit="return confirm('Delete this goal?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@goal.Id" />
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    @if (!string.IsNullOrWhiteSpace(goal.Description))
+                                    {
+                                        <p class="text-muted">@goal.Description</p>
+                                    }
+
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between mb-1">
+                                            <span class="small">Progress</span>
+                                            <span class="small">@progressPercentage.ToString("F1")%</span>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar @(goal.IsCompleted ? "bg-success" : progressPercentage > 100 ? "bg-info" : "bg-primary")"
+                                                 role="progressbar"
+                                                 style="width: @Math.Min(progressPercentage, 100)%"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row text-center">
+                                        <div class="col-4">
+                                            <div class="border-end">
+                                                <div class="text-success fw-bold">@CurrencyDisplay.Format(goal.CurrentAmount, cc)</div>
+                                                <small class="text-muted">Current</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="border-end">
+                                                <div class="text-primary fw-bold">@CurrencyDisplay.Format(goal.TargetAmount, cc)</div>
+                                                <small class="text-muted">Target</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="text-info fw-bold">@CurrencyDisplay.Format(goal.RemainingAmount, cc)</div>
+                                            <small class="text-muted">Remaining</small>
+                                        </div>
+                                    </div>
+
+                                    @if (!goal.IsCompleted)
+                                    {
+                                        <div class="mt-3 pt-3 border-top">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <i class="bi bi-calendar-event"></i>
+                                                    <strong>Target:</strong> @(goal.TargetDate?.ToString("MMM dd, yyyy") ?? "No date")
+                                                </div>
+                                                <div>
+                                                    @if (goal.TargetDate.HasValue)
+                                                    {
+                                                        if (daysRemaining > 0)
+                                                        {
+                                                            <span class="badge bg-light text-dark">@daysRemaining days left</span>
+                                                        }
+                                                        else if (daysRemaining == 0)
+                                                        {
+                                                            <span class="badge bg-warning">Due today</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="badge bg-danger">@Math.Abs(daysRemaining) days overdue</span>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    else if (goal.CompletedAt.HasValue)
+                                    {
+                                        <div class="mt-3 pt-3 border-top text-success">
+                                            <i class="bi bi-check-circle"></i>
+                                            <strong>Completed:</strong> @goal.CompletedAt.Value.ToString("MMM dd, yyyy")
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Modal -->
+                        <div class="modal fade" id="progressModal-@goal.Id" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form asp-action="UpdateProgress" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@goal.Id" />
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Add Progress - @goal.Name</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="text-muted mb-3">
+                                                Current: <strong>@CurrencyDisplay.Format(goal.CurrentAmount, cc)</strong> /
+                                                Target: <strong>@CurrencyDisplay.Format(goal.TargetAmount, cc)</strong>
+                                            </p>
+                                            <div class="mb-3">
+                                                <label class="form-label" for="amount-@goal.Id">Amount to add</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">@curSym</span>
+                                                    <input type="number" class="form-control" id="amount-@goal.Id"
+                                                           name="amount" step="0.01" min="0.01" required />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-plus-circle"></i> Update Progress
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="dd-empty mb-4">
+                    <img src="~/images/branding/empty-envelopes.svg" asp-append-version="true" alt="" />
+                    <h4>No goals yet — pick a target</h4>
+                    <p>Set a savings, debt, or emergency-fund goal. Progress shows here once you start stacking dough.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                        <i class="bi bi-plus-circle"></i> Create your first goal
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Add Goal Modal -->
+<div class="modal fade" id="addGoalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Financial Goal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="goalName">Goal Name</label>
+                                <input type="text" class="form-control" id="goalName" name="Name" maxlength="100" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="goalType">Goal Type</label>
+                                <select class="form-select" id="goalType" name="GoalType" required>
+                                    <option value="@((int)DoughDoodle.Models.GoalType.Savings)">Savings</option>
+                                    <option value="@((int)DoughDoodle.Models.GoalType.DebtPayoff)">Debt Payoff</option>
+                                    <option value="@((int)DoughDoodle.Models.GoalType.EmergencyFund)">Emergency Fund</option>
+                                    <option value="@((int)DoughDoodle.Models.GoalType.Purchase)">Purchase</option>
+                                    <option value="@((int)DoughDoodle.Models.GoalType.Investment)">Investment</option>
+                                    <option value="@((int)DoughDoodle.Models.GoalType.Income)">Income</option>
+                                    <option value="@((int)DoughDoodle.Models.GoalType.Custom)">Custom</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="goalDescription">Description</label>
+                        <textarea class="form-control" id="goalDescription" name="Description" rows="3" maxlength="500"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="targetAmount">Target Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@curSym</span>
+                                    <input type="number" class="form-control" id="targetAmount" name="TargetAmount" step="0.01" min="0.01" required />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="currentAmount">Current Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@curSym</span>
+                                    <input type="number" class="form-control" id="currentAmount" name="CurrentAmount" step="0.01" min="0" value="0" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="targetDate">Target Date</label>
+                        <input type="date" class="form-control" id="targetDate" name="TargetDate" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create Goal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
